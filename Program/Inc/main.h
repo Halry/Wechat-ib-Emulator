@@ -41,7 +41,7 @@
   /* Includes ------------------------------------------------------------------*/
 
 /* USER CODE BEGIN Includes */
-
+#include "HAL_Config.h"
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
