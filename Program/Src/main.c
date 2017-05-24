@@ -67,6 +67,7 @@
 
 int main(void)
 {
+	System_Startup_Init();
 
   /* USER CODE BEGIN 1 */
 

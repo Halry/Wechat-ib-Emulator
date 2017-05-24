@@ -15,5 +15,5 @@ static void USART3_UART_Init(void);
 static void USB_PCD_Init(void);
 static void WWDG_Init(void);
 static void IWDG_Init(void);
-
+void System_Startup_Init(void);
 #endif
