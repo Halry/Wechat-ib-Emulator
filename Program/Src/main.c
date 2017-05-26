@@ -94,13 +94,14 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
-
+OLED_ShowString(0,3,"1.3' OLED TEST");
+OLED_R_ShowString(1,1,"1.3' OLED TEST");
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
   /* USER CODE END WHILE */
-
+		
   /* USER CODE BEGIN 3 */
 
   }

@@ -311,7 +311,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>6</Optim>
+            <Optim>5</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -399,6 +399,11 @@
               <FileName>HAL_Config.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\HAL_Config.c</FilePath>
+            </File>
+            <File>
+              <FileName>OLED.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\OLED.c</FilePath>
             </File>
           </Files>
         </Group>

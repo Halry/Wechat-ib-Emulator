@@ -78,7 +78,7 @@ void SystemClock_Config(void)
 }
 
 /* ADC1 init function */
-static void ADC1_Init(void)
+void ADC1_Init(void)
 {
 
   ADC_ChannelConfTypeDef sConfig;
@@ -125,7 +125,7 @@ static void ADC1_Init(void)
 }
 
 /* CRC init function */
-static void CRC_Init(void)
+void CRC_Init(void)
 {
 
   hcrc.Instance = CRC;
@@ -137,7 +137,7 @@ static void CRC_Init(void)
 }
 
 /* IWDG init function */
-static void IWDG_Init(void)
+void IWDG_Init(void)
 {
 
   hiwdg.Instance = IWDG;
@@ -151,7 +151,7 @@ static void IWDG_Init(void)
 }
 
 /* RTC init function */
-static void RTC_Init(void)
+void RTC_Init(void)
 {
 
   RTC_TimeTypeDef sTime;
@@ -204,7 +204,7 @@ static void RTC_Init(void)
 }
 
 /* SPI2 init function */
-static void SPI2_Init(void)
+void SPI2_Init(void)
 {
 
   hspi2.Instance = SPI2;
@@ -227,7 +227,7 @@ static void SPI2_Init(void)
 }
 
 /* TIM2 init function */
-static void TIM2_Init(void)
+void TIM2_Init(void)
 {
 
   TIM_MasterConfigTypeDef sMasterConfig;
@@ -264,7 +264,7 @@ static void TIM2_Init(void)
 }
 
 /* TIM3 init function */
-static void TIM3_Init(void)
+void TIM3_Init(void)
 {
 
   TIM_MasterConfigTypeDef sMasterConfig;
@@ -301,7 +301,7 @@ static void TIM3_Init(void)
 }
 
 /* USART1 init function */
-static void USART1_UART_Init(void)
+void USART1_UART_Init(void)
 {
 
   huart1.Instance = USART1;
@@ -320,7 +320,7 @@ static void USART1_UART_Init(void)
 }
 
 /* USART3 init function */
-static void USART3_UART_Init(void)
+void USART3_UART_Init(void)
 {
 
   huart3.Instance = USART3;
@@ -339,7 +339,7 @@ static void USART3_UART_Init(void)
 }
 
 /* USB init function */
-static void USB_PCD_Init(void)
+void USB_PCD_Init(void)
 {
 
   hpcd_USB_FS.Instance = USB;
@@ -357,7 +357,7 @@ static void USB_PCD_Init(void)
 }
 
 /* WWDG init function */
-static void WWDG_Init(void)
+void WWDG_Init(void)
 {
 
   hwwdg.Instance = WWDG;
@@ -381,7 +381,7 @@ static void WWDG_Init(void)
         * the Code Generation settings)
      PA8   ------> RCC_MCO
 */
-static void GPIO_Init(void)
+void GPIO_Init(void)
 {
 
   GPIO_InitTypeDef GPIO_InitStruct;
@@ -396,7 +396,7 @@ static void GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_15, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_14|GPIO_PIN_6 
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_14 
                           |GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : PA1 PA2 PA3 */
@@ -413,19 +413,26 @@ static void GPIO_Init(void)
 
   /*Configure GPIO pins : PB0 PB1 PB14 PB6 
                            PB7 PB8 PB9 */
+													 //PB0:BT_Ctr PB1:LCD_Ctr PB6:TP_CE PB7:R_LED PB8:USB_Em PB9:LCD_DC PB14:LCD_RES
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_14|GPIO_PIN_6 
                           |GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+	GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_8;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB2 PB4 */
+	//PB2:TP_CHRG PB4:TP_STD
   GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PA8 */
+	//MCO Output
   GPIO_InitStruct.Pin = GPIO_PIN_8;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -466,7 +473,8 @@ void System_Startup_Init(void)
   TIM3_Init();
   USART1_UART_Init();
   USART3_UART_Init();
-  USB_PCD_Init();
+	OLED_Init();
+  //USB_PCD_Init();
   //WWDG_Init();
   //IWDG_Init();
 }
