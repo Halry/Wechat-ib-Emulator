@@ -44,6 +44,9 @@
 #include "HAL_Config.h"
 #include "stdbool.h"
 #include "stdint.h"
+#include "stdlib.h"
+#include "string.h"
+#include "misc_function.h"
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/

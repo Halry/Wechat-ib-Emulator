@@ -17,4 +17,5 @@ void USB_PCD_Init(void);
 void WWDG_Init(void);
 void IWDG_Init(void);
 void System_Startup_Init(void);
+void _Error_Handler(char * file, int line);
 #endif

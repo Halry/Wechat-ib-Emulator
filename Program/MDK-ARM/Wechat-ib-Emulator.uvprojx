@@ -405,6 +405,11 @@
               <FileType>1</FileType>
               <FilePath>..\Src\OLED.c</FilePath>
             </File>
+            <File>
+              <FileName>misc_function.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\misc_function.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
