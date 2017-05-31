@@ -202,6 +202,9 @@ void ADC1_2_IRQHandler(void)
 {
 	HAL_ADC_IRQHandler(&hadc1);
 }
+void RCC_IRQHandler(void)
+{
+}
 /* USER CODE BEGIN 1 */
 
 /* USER CODE END 1 */
