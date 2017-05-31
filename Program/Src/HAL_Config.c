@@ -26,6 +26,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.LSIState = RCC_LSI_ON;
+	RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
@@ -314,7 +315,6 @@ void USART3_UART_Init(void)
 /* USB init function */
 void USB_PCD_Init(void)
 {
-
   hpcd_USB_FS.Instance = USB;
   hpcd_USB_FS.Init.dev_endpoints = 8;
   hpcd_USB_FS.Init.speed = PCD_SPEED_FULL;
@@ -326,7 +326,7 @@ void USB_PCD_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-
+	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_8,GPIO_PIN_SET);
 }
 
 /* WWDG init function */
@@ -392,10 +392,6 @@ void GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-	GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_8;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB2 PB4 */
 	//PB2:TP_CHRG PB4:TP_STD
@@ -447,7 +443,7 @@ void System_Startup_Init(void)
   USART1_UART_Init();
   USART3_UART_Init();
 	OLED_Init();
-  //USB_PCD_Init();
+  USB_PCD_Init();
   //WWDG_Init();
   //IWDG_Init();
 }
