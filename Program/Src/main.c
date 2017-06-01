@@ -13,9 +13,9 @@
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
-unsigned short Signin_Count;
+uint8_t Signin_Count;
 
-
+extern const uint8_t Bat_Display[];
                                 
                                 
 
@@ -31,8 +31,7 @@ unsigned short Signin_Count;
 int main(void)
 {
 	System_Startup_Init();
-OLED_ShowString(0,3,"1.3' OLED TEST");
-OLED_R_ShowString(1,1,"1.3' OLED TEST");
+	UI_Print_Bat_Stat(UI_BAT_CHRG);
 ADC_Get_Value();
   while (1)
   {

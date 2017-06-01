@@ -47,6 +47,9 @@
 #include "stdlib.h"
 #include "string.h"
 #include "misc_function.h"
+#include "OLED.h"
+#include "UI.h"
+#include "bluetooth_control.h"
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/

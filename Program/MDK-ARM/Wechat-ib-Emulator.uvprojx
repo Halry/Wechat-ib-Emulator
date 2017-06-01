@@ -311,7 +311,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>5</Optim>
+            <Optim>6</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -414,6 +414,11 @@
               <FileName>bluetooth_control.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\bluetooth_control.c</FilePath>
+            </File>
+            <File>
+              <FileName>UI.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\UI.c</FilePath>
             </File>
           </Files>
         </Group>
