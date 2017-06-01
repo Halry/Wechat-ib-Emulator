@@ -244,6 +244,17 @@ void TIM3_Init(void)
   HAL_TIM_MspPostInit(&htim3);
 
 }
+/* CRC init function */
+void CRC_Init(void)
+{
+
+  hcrc.Instance = CRC;
+  if (HAL_CRC_Init(&hcrc) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+}
 
 /* USART1 init function */
 void USART1_UART_Init(void)
@@ -380,6 +391,7 @@ void System_Startup_Init(void)
   SPI2_Init();
   TIM2_Init();
   TIM3_Init();
+	CRC_Init();
   USART1_UART_Init();
   USART3_UART_Init();
 	OLED_Init();
