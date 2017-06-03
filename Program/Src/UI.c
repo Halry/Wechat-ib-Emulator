@@ -10,7 +10,7 @@ const uint8_t Battery_Charging_Icon[12]={
 
 void UI_Print_Bat_Stat(uint8_t bat_stat)
 {
-uint8_t* bat_bmp_ptr;
+const uint8_t* bat_bmp_ptr;
 	switch(bat_stat)
 	{
 		case UI_BAT_FULL:

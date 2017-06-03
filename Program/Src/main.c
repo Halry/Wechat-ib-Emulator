@@ -15,7 +15,6 @@
 /* Private function prototypes -----------------------------------------------*/
 uint8_t Signin_Count;
 
-extern const uint8_t Bat_Display[];
                                 
                                 
 
