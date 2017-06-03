@@ -50,12 +50,12 @@
 #include "OLED.h"
 #include "UI.h"
 #include "bluetooth_control.h"
+#include "stm32f1xx_hal.h"
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
 
 /* USER CODE BEGIN Private defines */
-
 /* USER CODE END Private defines */
 
 void _Error_Handler(char *, int);

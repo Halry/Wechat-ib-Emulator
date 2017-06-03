@@ -97,7 +97,7 @@ unsigned char F6x8[][6] =
 };
 
 	
-void OLED_DrawBMP(uint8_t x0, uint8_t y0,uint8_t x1, uint8_t y1,uint8_t* BMP)
+void OLED_DrawBMP(uint8_t x0, uint8_t y0,uint8_t x1, uint8_t y1,const uint8_t* BMP)
 { 	
  unsigned int j=0;
  unsigned char x,y;
@@ -156,7 +156,7 @@ void OLED_R_ShowChar(uint8_t x,uint8_t y,uint8_t chr)
 				OLED_WR_R_Byte(F6x8[c][i],OLED_DATA_FLAG);
 			
 }
-void OLED_ShowString(uint8_t x,uint8_t y,uint8_t *chr)
+void OLED_ShowString(uint8_t x,uint8_t y,const uint8_t *chr)
 {
 	unsigned char j=0;
 	while (chr[j]!='\0')
@@ -166,7 +166,7 @@ void OLED_ShowString(uint8_t x,uint8_t y,uint8_t *chr)
 			j++;
 	}
 }
-void OLED_R_ShowString(uint8_t x,uint8_t y,uint8_t *chr)
+void OLED_R_ShowString(uint8_t x,uint8_t y,const uint8_t *chr)
 {
 	unsigned char j=0;
 	while (chr[j]!='\0')
@@ -176,7 +176,22 @@ void OLED_R_ShowString(uint8_t x,uint8_t y,uint8_t *chr)
 			j++;
 	}
 }
-
+void OLED_ShowChinese(uint8_t x,uint8_t y,const uint8_t *chinese)
+{      			    
+	uint8_t addr=0;
+	OLED_Set_Pos(x,y);	
+    for(uint8_t t=0;t<16;t++)
+		{
+				OLED_WR_Byte(*(chinese+addr),OLED_DATA_FLAG);
+				addr+=1;
+     }	
+		OLED_Set_Pos(x,y+1);	
+    for(uint8_t t=0;t<16;t++)
+			{	
+				OLED_WR_Byte(*(chinese+addr),OLED_DATA_FLAG);
+				addr+=1;
+      }					
+}
 void OLED_Init(void)
 {
 	OLED_RST_SET();
@@ -211,7 +226,7 @@ void OLED_Init(void)
 	OLED_WR_Byte(0x8D,OLED_CMD_FLAG);//--set Charge Pump enable/disable
 	OLED_WR_Byte(0x14,OLED_CMD_FLAG);//--set(0x10) disable
 	OLED_WR_Byte(0xA4,OLED_CMD_FLAG);// Disable Entire Display On (0xa4/0xa5)
-	OLED_WR_Byte(0xA7,OLED_CMD_FLAG);// Disable Inverse Display On (0xa6/a7) 
+	OLED_WR_Byte(0xA6,OLED_CMD_FLAG);// Disable Inverse Display On (0xa6/a7) 
 	OLED_WR_Byte(0xAF,OLED_CMD_FLAG);//--turn on oled panel
 	OLED_WR_Byte(0xAF,OLED_CMD_FLAG); /*display ON*/ 
 	

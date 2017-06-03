@@ -22,9 +22,10 @@ void OLED_Init(void);
 void OLED_WR_Byte(uint8_t data,bool cmd_flag);
 void OLED_Clear(void);
 void OLED_Set_Pos(uint8_t x, uint8_t y) ;
-void OLED_ShowString(uint8_t x,uint8_t y,uint8_t *chr);
+void OLED_ShowString(uint8_t x,uint8_t y,const uint8_t *chr);
 void OLED_WR_R_Byte(uint8_t data,bool cmd_flag);
 void OLED_R_ShowChar(uint8_t x,uint8_t y,uint8_t chr);
-void OLED_R_ShowString(uint8_t x,uint8_t y,uint8_t *chr);
-void OLED_DrawBMP(uint8_t x0, uint8_t y0,uint8_t x1, uint8_t y1,uint8_t* BMP);
+void OLED_R_ShowString(uint8_t x,uint8_t y,const uint8_t *chr);
+void OLED_DrawBMP(uint8_t x0, uint8_t y0,uint8_t x1, uint8_t y1,const uint8_t* BMP);
+void OLED_ShowChinese(uint8_t x,uint8_t y,const uint8_t *chinese);
 #endif

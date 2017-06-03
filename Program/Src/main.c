@@ -30,8 +30,8 @@ uint8_t Signin_Count;
 int main(void)
 {
 	System_Startup_Init();
-	UI_Print_Bat_Stat(UI_BAT_CHRG);
 ADC_Get_Value();
+	UI_Print_Bat_Stat(UI_BAT_EMPTY);
   while (1)
   {
   /* USER CODE END WHILE */
@@ -46,7 +46,4 @@ void Write_Count_to_BKP(unsigned short Count)
 {
 	
 }
-void Start_beacon(uint8_t major,uint8_t minor)
-{
-	
-}
+
