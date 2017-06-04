@@ -42,6 +42,7 @@
 /* External variables --------------------------------------------------------*/
 extern RTC_HandleTypeDef hrtc;
 extern ADC_HandleTypeDef hadc1;
+extern UART_HandleTypeDef huart1;
 /******************************************************************************/
 /*            Cortex-M3 Processor Interruption and Exception Handlers         */ 
 /******************************************************************************/
@@ -206,6 +207,37 @@ void RCC_IRQHandler(void)
 {
 }
 void USART1_IRQHandler(void)
+{
+	HAL_UART_IRQHandler(&huart1);
+}
+void RTC_Alarm_IRQHandler(void)
+{
+}
+void SPI2_IRQHandler(void)
+{
+}
+void TIM4_IRQHandler(void)//Key Scan timer
+{
+}
+void EXTI0_IRQHandler(void)//X Button interrupt(Only for enable scan timer)
+{
+}
+void EXTI1_IRQHandler(void)//Up button
+{
+}
+void EXTI2_IRQHandler(void)//Down button and TP CHRG
+{
+}
+void EXTI3_IRQHandler(void)//Yes button
+{
+}
+void EXTI4_IRQHandler(void)//TP_STDBY
+{
+}
+void RTC_IRQHandler(void)
+{
+}
+void PVD_IRQHandler(void)//Display BAT low and put system to standby mode.
 {
 }
 /* USER CODE BEGIN 1 */

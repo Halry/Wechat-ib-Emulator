@@ -30,8 +30,9 @@ uint8_t Signin_Count;
 int main(void)
 {
 	System_Startup_Init();
-ADC_Get_Value();
-	UI_Print_Bat_Stat(UI_BAT_EMPTY);
+//ADC_Get_Value();
+	UI_Print_Bat_Stat(UI_BAT_FULL);
+	BT_Init();
   while (1)
   {
   /* USER CODE END WHILE */

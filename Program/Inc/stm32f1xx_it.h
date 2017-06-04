@@ -58,6 +58,8 @@ void TAMPER_IRQHandler(void);
 void ADC1_2_IRQHandler(void);
 void RCC_IRQHandler(void);
 void USART1_IRQHandler(void);
+void RTC_Alarm_IRQHandler(void);
+void SPI2_IRQHandler(void);
 #ifdef __cplusplus
 }
 #endif
