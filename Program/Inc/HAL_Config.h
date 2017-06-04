@@ -19,5 +19,4 @@ void IWDG_Init(void);
 void System_Startup_Init(void);
 void _Error_Handler(char * file, int line);
 void OverClock_to_HSE(void);
-void USART1_Overclock_Init(void);
 #endif
