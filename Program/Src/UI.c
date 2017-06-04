@@ -80,3 +80,4 @@ void UI_Clear_Below_Stat_Bar(void)
 		for(uint8_t n=0;n<128;n++)OLED_WR_Byte(0,OLED_DATA_FLAG); 
 	} 
 }
+
