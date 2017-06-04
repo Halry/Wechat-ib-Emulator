@@ -35,6 +35,7 @@ void BT_Init()
 		{
 			Error_Handler();
 		}
+		memset(BT_UART_Receive_Data,'\0',4);
 		HAL_UART_Transmit(&huart1,"AT+POWR3",8,0xFF);
 		HAL_Delay(100);
 		if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
