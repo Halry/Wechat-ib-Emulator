@@ -1,9 +1,9 @@
 #include "bluetooth_control.h"
 extern UART_HandleTypeDef huart1;
-bool bluetooth_inited=false;
-const uint8_t BT_Classroom_Minor[3][4]={{"5581"},{"55A6"},{"55D7"}};
+bool bluetooth_inited=true;
+uint8_t const BT_Classroom_Minor[3][4]={{"5581"},{"55A6"},{"55D7"}};
 uint8_t *BT_UART_Receive_Data=NULL;
-uint8_t *BT_Transmit_Data=NULL;
+uint8_t *BT_UART_Transmit_Data=NULL;
 void BT_Init()
 {
 	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_0,GPIO_PIN_SET);
@@ -112,7 +112,7 @@ void BT_Init()
 		{
 			Error_Handler();
 		}
-		HAL_UART_Transmit(&huart1,"AT+ADVEN0",9,0xFF);//Reset the minor to 0x0000
+		HAL_UART_Transmit(&huart1,"AT+ADVEN0",9,0xFF);//Disable advertising
 		HAL_Delay(100);
 			if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
 		{
@@ -124,7 +124,7 @@ void BT_Init()
 	}
 	
 } 
-void Start_beacon(uint8_t *minor)
+void Start_beacon(const uint8_t *minor)
 {
 	OverClock_to_HSE();
 		USART1_Overclock_Init();
@@ -132,11 +132,36 @@ void Start_beacon(uint8_t *minor)
 		{
 			Error_Handler();
 		}
+		if((BT_UART_Transmit_Data=malloc(12))==NULL)
+		{
+			Error_Handler();
+		}
 		if(HAL_UART_Receive_IT(&huart1,BT_UART_Receive_Data,4)==HAL_ERROR)
 		{
 			Error_Handler();
 		}
-		
+		memcpy(BT_UART_Transmit_Data,"AT+MINOR",8);
+		memcpy(BT_UART_Transmit_Data+8,minor,4);
+		HAL_UART_Transmit(&huart1,BT_UART_Transmit_Data,12,0xFF);//Reset the minor to 0x0000
+		HAL_Delay(100);
+			if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
+		{
+					HAL_UART_DeInit(&huart1);//Display error
+		}
+		memset(BT_UART_Receive_Data,'\0',4);
+		if(HAL_UART_Receive_IT(&huart1,BT_UART_Receive_Data,4)==HAL_ERROR)
+		{
+			Error_Handler();
+		}
+		HAL_UART_Transmit(&huart1,"AT+ADVEN1",9,0xFF);//Enable Advertising
+		HAL_Delay(100);
+			if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
+		{
+					HAL_UART_DeInit(&huart1);//Display error
+		}
+		free(BT_UART_Transmit_Data);
+		HAL_UART_DeInit(&huart1);
+		Downclock_to_HSI();
 }
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
