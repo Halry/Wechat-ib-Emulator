@@ -1,12 +1,12 @@
 #include "UI.h"
 //Status bar Icon
- uint8_t Battery_Full_Icon[12]={
+const uint8_t Battery_Full_Icon[12]={
 	0x0C,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F};
- uint8_t Battery_Half_Icon[12]={
+const uint8_t Battery_Half_Icon[12]={
 	0x0C,0x3F,0x21,0x21,0x21,0x21,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F};
- uint8_t Battery_Empty_Icon[12]={
+const uint8_t Battery_Empty_Icon[12]={
 	0x0C,0x3F,0x21,0x21,0x23,0x27,0x2D,0x39,0x31,0x21,0x21,0x3F};
- uint8_t Battery_Charging_Icon[12]={
+const uint8_t Battery_Charging_Icon[12]={
 	0x0C,0x3F,0x21,0x33,0x33,0x3F,0x2D,0x2D,0x2D,0x2D,0x2D,0x3F};
 const uint8_t Auto_Icon[5]={0x3C,0x12,0x11,0x12,0x3C};
 	const uint8_t Prototype_Icon[5]={0x3F,0x09,0x09,0x0F,0x00};
@@ -44,24 +44,28 @@ const uint8_t Auto_Icon[5]={0x3C,0x12,0x11,0x12,0x3C};
 			const uint8_t Classroom_String[3][5]={{"7A105"},{"7A318"},{"7B208"}};
 void UI_Print_Bat_Stat(uint8_t bat_stat)
 {
- uint8_t* bat_bmp_ptr;
+const uint8_t* bat_bmp_ptr;
 	switch(bat_stat)
 	{
 		case UI_BAT_FULL:
 		{
 			bat_bmp_ptr=Battery_Full_Icon;
+			break;
 		}
 		case UI_BAT_HALF:
 		{
 			bat_bmp_ptr=Battery_Half_Icon;
+			break;
 		}
 		case UI_BAT_EMPTY:
 		{
 			bat_bmp_ptr=Battery_Empty_Icon;
+			break;
 		}
 		case UI_BAT_CHRG:
 		{
 			bat_bmp_ptr=Battery_Charging_Icon;
+			break;
 		}
 	}
 		OLED_DrawBMP(115,0,127,1,bat_bmp_ptr);

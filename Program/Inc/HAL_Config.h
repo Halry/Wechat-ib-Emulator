@@ -3,7 +3,7 @@
 #include "main.h"
 #include "stm32f1xx_hal.h"
 #include "OLED.h"
-void SystemClock_Config(void);
+void Downclock_to_HSI(void);
 void GPIO_Init(void);
 void ADC1_Init(void);
 void CRC_Init(void);
@@ -18,4 +18,6 @@ void WWDG_Init(void);
 void IWDG_Init(void);
 void System_Startup_Init(void);
 void _Error_Handler(char * file, int line);
+void OverClock_to_HSE(void);
+void USART1_Overclock_Init(void);
 #endif

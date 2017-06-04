@@ -31,7 +31,7 @@ int main(void)
 {
 	System_Startup_Init();
 //ADC_Get_Value();
-	UI_Print_Bat_Stat(UI_BAT_FULL);
+	UI_Print_Bat_Stat(UI_BAT_HALF);
 	BT_Init();
   while (1)
   {

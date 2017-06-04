@@ -6,18 +6,73 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 UART_HandleTypeDef huart1;
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-void SystemClock_Config(void)
+void Downclock_to_HSI(void)
 {
 
   RCC_OscInitTypeDef RCC_OscInitStruct;
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
   RCC_PeriphCLKInitTypeDef PeriphClkInit;
+	
+	HAL_RCC_DeInit();
 
     /**Initializes the CPU, AHB and APB busses clocks 
     */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
+   RCC_OscInitStruct.HSEState = RCC_HSE_OFF;
+  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_ADC;
+  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV4;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+    /**Initializes the CPU, AHB and APB busses clocks 
+    */
+	HAL_RCC_GetHCLKFreq();
+	HAL_RCC_GetPCLK1Freq();
+	HAL_RCC_GetPCLK1Freq();
+    /**Configure the Systick interrupt time 
+    */
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+
+    /**Configure the Systick 
+    */
+  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+
+	
+}
+void OverClock_to_HSE(void)
+{
+	 RCC_OscInitTypeDef RCC_OscInitStruct;
+  RCC_ClkInitTypeDef RCC_ClkInitStruct;
+  RCC_PeriphCLKInitTypeDef PeriphClkInit;
+
+	HAL_RCC_DeInit();
+    /**Initializes the CPU, AHB and APB busses clocks 
+    */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
   RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.LSIState = RCC_LSI_ON;
@@ -49,13 +104,9 @@ RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-
-  HAL_RCC_MCOConfig(RCC_MCO, RCC_MCO1SOURCE_PLLCLK, RCC_MCODIV_1);
-
-    /**Enables the Clock Security System 
-    */
-  HAL_RCC_EnableCSS();
-
+HAL_RCC_GetHCLKFreq();
+	HAL_RCC_GetPCLK1Freq();
+	HAL_RCC_GetPCLK1Freq();
     /**Configure the Systick interrupt time 
     */
   HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
@@ -64,10 +115,7 @@ RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
     */
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
-  /* SysTick_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
-
 /* ADC1 init function */
 void ADC1_Init(void)
 {
@@ -84,6 +132,7 @@ void ADC1_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
+	HAL_NVIC_SetPriority(ADC1_IRQn,2,0);
 HAL_NVIC_EnableIRQ(ADC1_IRQn);
     /**Configure Regular Channel 
     */
@@ -217,6 +266,24 @@ void USART1_UART_Init(void)
 {
 
   huart1.Instance = USART1;
+  huart1.Init.BaudRate = 57600;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	huart1.Init.OverSampling=UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+	HAL_NVIC_SetPriority(USART1_IRQn,0,0);
+HAL_NVIC_EnableIRQ(USART1_IRQn);
+}
+void USART1_Overclock_Init(void)
+{
+	
+  huart1.Instance = USART1;
   huart1.Init.BaudRate = 115200;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
@@ -228,6 +295,7 @@ void USART1_UART_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
+	HAL_NVIC_SetPriority(USART1_IRQn,0,0);
 HAL_NVIC_EnableIRQ(USART1_IRQn);
 }
 /** Configure pins as 
@@ -327,7 +395,8 @@ void System_Startup_Init(void)
 {
 	HAL_DeInit();
 	 HAL_Init();
-	 SystemClock_Config();
+	 Downclock_to_HSI();
+	//OverClock_to_HSE();
 	/* Initialize all configured peripherals */
   GPIO_Init();
   ADC1_Init();
@@ -335,6 +404,5 @@ void System_Startup_Init(void)
   SPI2_Init();
   //TIM2_Init();
   //TIM3_Init();
-  USART1_UART_Init();
 	OLED_Init();
 }
