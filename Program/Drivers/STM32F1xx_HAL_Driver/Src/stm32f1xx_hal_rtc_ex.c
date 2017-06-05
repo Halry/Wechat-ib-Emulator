@@ -486,7 +486,7 @@ __weak void HAL_RTCEx_RTCEventErrorCallback(RTC_HandleTypeDef *hrtc)
 void HAL_RTCEx_BKUPWrite(RTC_HandleTypeDef *hrtc, uint32_t BackupRegister, uint32_t Data)
 {
   uint32_t tmp = 0;
-
+	__HAL_RCC_BKP_CLK_ENABLE();
   /* Check the parameters */
   assert_param(IS_RTC_BKP(BackupRegister));
   
@@ -494,6 +494,7 @@ void HAL_RTCEx_BKUPWrite(RTC_HandleTypeDef *hrtc, uint32_t BackupRegister, uint3
   tmp += (BackupRegister * 4);
 
   *(__IO uint32_t *) tmp = (Data & BKP_DR1_D);
+	__HAL_RCC_BKP_CLK_DISABLE();
 }
 
 /**
@@ -507,6 +508,7 @@ void HAL_RTCEx_BKUPWrite(RTC_HandleTypeDef *hrtc, uint32_t BackupRegister, uint3
   */
 uint32_t HAL_RTCEx_BKUPRead(RTC_HandleTypeDef *hrtc, uint32_t BackupRegister)
 {
+	__HAL_RCC_BKP_CLK_ENABLE();
   uint32_t backupregister = 0;
   uint32_t pvalue = 0;
 
@@ -517,7 +519,7 @@ uint32_t HAL_RTCEx_BKUPRead(RTC_HandleTypeDef *hrtc, uint32_t BackupRegister)
   backupregister += (BackupRegister * 4);
   
   pvalue = (*(__IO uint32_t *)(backupregister)) & BKP_DR1_D;
-
+__HAL_RCC_BKP_CLK_DISABLE();
   /* Read the specified register */
   return pvalue;
 }

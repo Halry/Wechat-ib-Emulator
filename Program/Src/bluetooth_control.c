@@ -230,8 +230,10 @@ void BT_Read_Setup_BKP(void)
 }
 void BT_Write_Setup_BKP(void)
 {
+	HAL_PWR_EnableBkUpAccess();
 	HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR9,((*(BT_Last_Minor+2)<<8)|*(BT_Last_Minor+3)));
 	HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR10,((*(BT_Last_Minor)<<8)|*(BT_Last_Minor+1)));
+	HAL_PWR_DisableBkUpAccess();
 }
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {

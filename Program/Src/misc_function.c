@@ -47,6 +47,41 @@ void ADC_Action(bool Is_Init)
 		
 	}
 }
+uint8_t Key_Scan(void)
+{
+	uint8_t temp_key=0;
+	bool yes_key=0;
+	if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_3)==GPIO_PIN_RESET)
+	{
+		yes_key=true;
+		temp_key=Key_OK;
+	}
+	if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0)==GPIO_PIN_SET)
+	{
+		if(yes_key==true)
+		{
+			temp_key=Key_RST_Combine;
+		}
+		else
+		{
+			temp_key=Key_X;
+		}
+	}
+	else if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_2)==GPIO_PIN_RESET)
+	{
+		temp_key=Key_Down;
+	}
+	else if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_1)==GPIO_PIN_RESET)
+	{
+		temp_key=Key_Up;
+	}
+	else
+	{
+		temp_key=0;
+	}
+	return temp_key;
+}
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	ADC_Value[ADC_Sample_Current_Channel]=HAL_ADC_GetValue(&hadc1);

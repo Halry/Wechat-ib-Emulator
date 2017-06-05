@@ -43,6 +43,7 @@
 extern RTC_HandleTypeDef hrtc;
 extern ADC_HandleTypeDef hadc1;
 extern UART_HandleTypeDef huart1;
+extern TIM_HandleTypeDef htim4;
 /******************************************************************************/
 /*            Cortex-M3 Processor Interruption and Exception Handlers         */ 
 /******************************************************************************/
@@ -218,20 +219,25 @@ void SPI2_IRQHandler(void)
 }
 void TIM4_IRQHandler(void)//Key Scan timer
 {
+	HAL_TIM_IRQHandler(&htim4);
 }
 void EXTI0_IRQHandler(void)//X Button interrupt(Only for enable scan timer)
 {
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
 }
-void EXTI1_IRQHandler(void)//Up button
+void EXTI2_IRQHandler(void)//TP CHRG
 {
-}
-void EXTI2_IRQHandler(void)//Down button and TP CHRG
-{
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2);
 }
 void EXTI3_IRQHandler(void)//Yes button
 {
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_3);
 }
 void EXTI4_IRQHandler(void)//TP_STDBY
+{
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_4);
+}
+void EXTI9_5_IRQHandler(void)//TP CE
 {
 }
 void RTC_IRQHandler(void)

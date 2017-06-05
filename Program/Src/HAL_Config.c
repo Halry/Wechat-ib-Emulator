@@ -4,8 +4,10 @@ RTC_HandleTypeDef hrtc;
 SPI_HandleTypeDef hspi2;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
+TIM_HandleTypeDef htim4;
 UART_HandleTypeDef huart1;
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 void Downclock_to_HSI(void)
 {
 
@@ -35,7 +37,7 @@ void Downclock_to_HSI(void)
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV4;
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
@@ -59,7 +61,7 @@ void Downclock_to_HSI(void)
     /**Configure the Systick 
     */
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
-
+__HAL_RCC_PWR_CLK_ENABLE();
 	
 }
 void OverClock_to_HSE(void)
@@ -75,7 +77,7 @@ void OverClock_to_HSE(void)
    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.LSIState = RCC_LSI_OFF;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
@@ -261,6 +263,27 @@ void TIM3_Init(void)
   HAL_TIM_MspPostInit(&htim3);
 
 }
+void TIM4_Start(void)
+{
+	__HAL_RCC_TIM4_CLK_ENABLE();
+  htim4.Instance = TIM4;
+  htim4.Init.Prescaler = 23999;
+  htim4.Init.Period = 10;
+  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+  if(HAL_TIM_Base_Init(&htim4) != HAL_OK)
+  {
+     _Error_Handler(__FILE__, __LINE__);
+  }
+  __HAL_TIM_SetCounter(&htim4, 0);
+  __HAL_TIM_CLEAR_FLAG(&htim4, TIM_FLAG_UPDATE);
+  __HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);
+  HAL_NVIC_SetPriority(TIM4_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ(TIM4_IRQn);
+  if(HAL_TIM_Base_Start_IT(&htim4) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+}
 /** Configure pins as 
         * Analog 
         * Input 
@@ -282,12 +305,16 @@ void GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 	//PA0:PW_Button,PA1:Up,PA2:Down,PA3:X
-	
- 
+	HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN1);
+   GPIO_InitStruct.Pin = GPIO_PIN_0;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
   /*Configure GPIO pins : PA1 PA2 PA3 */
   GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PA5 PA6 PA7 */
@@ -305,19 +332,22 @@ void GPIO_Init(void)
   /*Configure GPIO pins : PB0 PB1 PB14 PB6 
                            PB7 PB8 PB9 */
 													 //PB0:BT_Ctr PB1:LCD_Ctr PB6:TP_CE PB7:R_LED PB8:USB_Em PB9:LCD_DC PB14:LCD_RES
-  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_14|GPIO_PIN_6 
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_14 
                           |GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+	GPIO_InitStruct.Pin = GPIO_PIN_6;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB2 PB4 */
 	//PB2:TP_CHRG PB4:TP_STD
   GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_4;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
   /*Configure GPIO pin : PA8 */
 	//MCO Output
   GPIO_InitStruct.Pin = GPIO_PIN_8;
@@ -333,6 +363,11 @@ void GPIO_Init(void)
                           |GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9, GPIO_PIN_RESET);
 													
 													HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,GPIO_PIN_SET);
+HAL_NVIC_SetPriority(EXTI2_IRQn, 4, 0);//TP_CHRG Detect
+HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+HAL_NVIC_SetPriority(EXTI4_IRQn, 4, 0);//TP_STDBY Detect
+HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+													
 }
 
 /* USER CODE BEGIN 4 */
@@ -358,7 +393,12 @@ void System_Startup_Init(void)
 {
 	HAL_DeInit();
 	 HAL_Init();
+
+
 	 Downclock_to_HSI();
+	HAL_EnableDBGStandbyMode();
+		__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+	__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
 	//OverClock_to_HSE();
 	/* Initialize all configured peripherals */
   GPIO_Init();
@@ -368,4 +408,5 @@ void System_Startup_Init(void)
   //TIM2_Init();
   //TIM3_Init();
 	OLED_Init();
+	TIM4_Start();
 }

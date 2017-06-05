@@ -14,7 +14,7 @@
 
 /* Private function prototypes -----------------------------------------------*/
 uint8_t Signin_Count;
-
+extern TIM_HandleTypeDef htim4;
                                 
                                 
 
@@ -30,13 +30,15 @@ uint8_t Signin_Count;
 int main(void)
 {
 	System_Startup_Init();
-//ADC_Get_Value();
+ADC_Get_Value();
 	UI_Print_Bat_Stat(UI_BAT_HALF);
-	BT_Init();
-	Start_beacon(BT_Classroom_Minor[1]);
-	Start_beacon(BT_Classroom_Minor[1]);
-	Start_beacon(BT_Classroom_Minor[0]);
-
+	HAL_Delay(5000);
+	//BT_Init();
+	//Start_beacon(BT_Classroom_Minor[1]);
+	//Start_beacon(BT_Classroom_Minor[1]);
+	//Start_beacon(BT_Classroom_Minor[0]);
+	//HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
+	//HAL_PWR_EnterSTANDBYMode();
   while (1)
   {
   /* USER CODE END WHILE */
@@ -47,8 +49,10 @@ int main(void)
   /* USER CODE END 3 */
 
 }
-void Write_Count_to_BKP(unsigned short Count)
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	
+	if(htim->Instance==TIM4)//every 10ms action
+	{	
+		Key_Handle();
+	}
 }
-

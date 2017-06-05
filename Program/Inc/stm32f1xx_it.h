@@ -60,6 +60,7 @@ void RCC_IRQHandler(void);
 void USART1_IRQHandler(void);
 void RTC_Alarm_IRQHandler(void);
 void SPI2_IRQHandler(void);
+void EXTI9_5_IRQHandler(void);
 #ifdef __cplusplus
 }
 #endif
