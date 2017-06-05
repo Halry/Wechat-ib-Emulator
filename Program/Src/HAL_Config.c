@@ -157,7 +157,7 @@ void RTC_Init(void)
     /**Enable the RTC Tamper 
     */
   sTamper.Tamper = RTC_TAMPER_1;
-  sTamper.Trigger = RTC_TAMPERTRIGGER_LOWLEVEL;
+  sTamper.Trigger = RTC_TAMPERTRIGGER_HIGHLEVEL;
   if (HAL_RTCEx_SetTamper_IT(&hrtc, &sTamper) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
