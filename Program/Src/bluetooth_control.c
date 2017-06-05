@@ -1,17 +1,18 @@
 #include "bluetooth_control.h"
 extern UART_HandleTypeDef huart1;
 extern RTC_HandleTypeDef hrtc;
-bool bluetooth_inited=false;
 uint8_t const BT_Classroom_Minor[3][4]={{"5581"},{"55A6"},{"55D7"}};
 uint8_t *BT_UART_Receive_Data=NULL;
 uint8_t *BT_UART_Transmit_Data=NULL;
-uint8_t BT_Last_Classroom=0;
+uint8_t *BT_Last_Minor=NULL;
 uint8_t BT_Left_ADV_Count=0;
 void BT_Init()
 {
-	BT_Read_Setup_BKP(false);
+	uint8_t null_minor[4];
+	memset(null_minor,'\0',4);
+	BT_Read_Setup_BKP();
 	//read out bluetooth inited and last time minor from bkp
-	if(bluetooth_inited==false)
+	if(memcmp(null_minor,BT_Last_Minor,4)==0)
 	{
 		BT_Power_Control(true);
 		USART1_Init();
@@ -118,15 +119,16 @@ void BT_Init()
 		{
 					HAL_UART_DeInit(&huart1);//Display error
 		}
+		memset(BT_Last_Minor,0xFF,4);
 		BT_Power_Control(false);
-		bluetooth_inited=true;
-		BT_Write_Setup_BKP(false);
+		BT_Write_Setup_BKP();
 		free(BT_UART_Receive_Data);
 		USART1_DeInit();
 	}
 } 
 void Start_beacon(const uint8_t *minor)
 {
+	BT_Power_Control(true);
 		USART1_Init();
 		if((BT_UART_Receive_Data=malloc(4))==NULL)
 		{
@@ -140,6 +142,8 @@ void Start_beacon(const uint8_t *minor)
 		{
 			Error_Handler();
 		}
+		if((memcmp(minor,BT_Last_Minor,4))!=0)
+		{
 		memcpy(BT_UART_Transmit_Data,"AT+MINOR",8);
 		memcpy(BT_UART_Transmit_Data+8,minor,4);
 		HAL_UART_Transmit(&huart1,BT_UART_Transmit_Data,12,0xFF);//Reset the minor to 0x0000
@@ -149,10 +153,12 @@ void Start_beacon(const uint8_t *minor)
 					HAL_UART_DeInit(&huart1);//Display error
 		}
 		memset(BT_UART_Receive_Data,'\0',4);
+	
 		if(HAL_UART_Receive_IT(&huart1,BT_UART_Receive_Data,4)==HAL_ERROR)
 		{
 			Error_Handler();
 		}
+	}
 		HAL_UART_Transmit(&huart1,"AT+ADVEN1",9,0xFF);//Enable Advertising
 		HAL_Delay(100);
 			if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
@@ -162,7 +168,7 @@ void Start_beacon(const uint8_t *minor)
 		free(BT_UART_Receive_Data);
 		free(BT_UART_Transmit_Data);
 		BT_Last_Minor=minor;
-		BT_Write_Setup_BKP(true);
+		BT_Write_Setup_BKP();
 		USART1_DeInit();
 }
 void Stop_beacon(void)
@@ -189,6 +195,7 @@ void Stop_beacon(void)
 		free(BT_UART_Receive_Data);
 		free(BT_UART_Transmit_Data);
 		USART1_DeInit();
+		BT_Power_Control(false);
 }
 void BT_Power_Control(bool power)
 {
@@ -207,7 +214,7 @@ void BT_Power_Control(bool power)
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_6,GPIO_PIN_RESET);//Wakeup Module
 		}
 }
-void BT_Read_Setup_BKP(bool Setup)
+void BT_Read_Setup_BKP(void)
 {
 	if((BT_Last_Minor=malloc(4))==NULL)
 		{
@@ -220,23 +227,11 @@ void BT_Read_Setup_BKP(bool Setup)
 		*(BT_Last_Minor+1)=(BT_Minor_BKP>>16);
 		*(BT_Last_Minor+2)=(BT_Minor_BKP>>8);
 		*(BT_Last_Minor+3)=BT_Minor_BKP;
-		bluetooth_inited=((HAL_RTCEx_BKUPRead(&hrtc,RTC_BKP_DR8))>>16);
 }
-void BT_Write_Setup_BKP(bool Is_Minor)
+void BT_Write_Setup_BKP(void)
 {
-	if(Is_Minor==true)
-	{
-		if(BT_Last_Minor==NULL)
-	{
-		Error_Handler();
-	}
-		HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR9,((*(BT_Last_Minor+2)<<8)|*(BT_Last_Minor+3)));
+	HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR9,((*(BT_Last_Minor+2)<<8)|*(BT_Last_Minor+3)));
 	HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR10,((*(BT_Last_Minor)<<8)|*(BT_Last_Minor+1)));
-	}
-	else
-	{
-		HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR8,((bluetooth_inited)<<15));
-	}
 }
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {

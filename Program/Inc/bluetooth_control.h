@@ -9,6 +9,6 @@ void Stop_beacon(void);
 void USART1_Init(void);
 void USART1_DeInit(void);
 void BT_Power_Control(bool power);
-void BT_Read_Setup_BKP(bool Setup);
-void BT_Write_Setup_BKP(bool Is_Minor);
+void BT_Read_Setup_BKP(void);
+void BT_Write_Setup_BKP(void);
 #endif
