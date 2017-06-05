@@ -396,9 +396,6 @@ void System_Startup_Init(void)
 
 
 	 Downclock_to_HSI();
-	HAL_EnableDBGStandbyMode();
-		__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
-	__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
 	//OverClock_to_HSE();
 	/* Initialize all configured peripherals */
   GPIO_Init();

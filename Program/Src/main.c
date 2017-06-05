@@ -34,9 +34,6 @@ ADC_Get_Value();
 	UI_Print_Bat_Stat(UI_BAT_HALF);
 	HAL_Delay(5000);
 	//BT_Init();
-	//Start_beacon(BT_Classroom_Minor[1]);
-	//Start_beacon(BT_Classroom_Minor[1]);
-	//Start_beacon(BT_Classroom_Minor[0]);
 	//HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
 	//HAL_PWR_EnterSTANDBYMode();
   while (1)

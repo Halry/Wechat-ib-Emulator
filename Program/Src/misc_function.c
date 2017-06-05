@@ -6,6 +6,7 @@ bool ADC_Get_Value_Done=false;
 uint8_t ADC_Sample_Current_Channel=0;
 uint8_t ADC_Busy_Tick=0;
 uint8_t ADC_Action_Tick=0;
+bool UI_BAT_Charging=false
 uint8_t ADC_Get_Value(void)
 {
 	if(ADC_Sample_Current_Channel!=0)
@@ -30,7 +31,7 @@ uint8_t ADC_Get_Value(void)
 	}
 	sConfig.Channel = ADC_CHANNEL_VREFINT;
   sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -81,7 +82,14 @@ uint8_t Key_Scan(void)
 	}
 	return temp_key;
 }
-
+void System_low_power(uint8_t low_power_type)
+{
+	switch(low_power_type)
+	{
+		case PWR_STDBY:
+			HAL_PWR_EnterSTANDBYMode();
+	}
+}
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	ADC_Value[ADC_Sample_Current_Channel]=HAL_ADC_GetValue(&hadc1);
@@ -92,7 +100,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 		{
 			sConfig.Channel=ADC_CHANNEL_4;
 	sConfig.Rank=1;
-	sConfig.SamplingTime=ADC_SAMPLETIME_1CYCLE_5;
+	sConfig.SamplingTime=ADC_SAMPLETIME_28CYCLES_5;
 	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -105,7 +113,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 		{
 	sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
   sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -122,4 +130,27 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			ADC_Get_Value_Done=true;
 		}
 	}
+	if(UI_BAT_Charging==false)
+	{
+	float bat=((float)ADC_Value[ADC_Bat_Channel_Value]/(float)ADC_Value[ADC_Verf_Channel_Value]);
+	if(bat>ADC_BAT_HALF)
+	{
+		UI_Print_Bat_Stat(UI_BAT_FULL);
+	}
+	else if(bat<=ADC_BAT_HALF)
+	{
+		UI_Print_Bat_Stat(UI_BAT_HALF);
+	}
+	else if(bat<=ADC_BAT_EMPTY)
+	{
+		UI_Print_Bat_Stat(UI_BAT_EMPTY);
+	}
+	else if(bat<=ADC_BAT_SHUTDOWN)
+	{
+		System_low_power(PWR_STDBY);
+	}
+	{
+		
+	}
+}
 }

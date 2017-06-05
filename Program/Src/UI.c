@@ -5,6 +5,7 @@ const uint8_t Classroom_String[3][5]={{"7A105"},{"7A318"},{"7B208"}};
 uint8_t Key_Pressed=0;
 uint8_t Key_Pressed_Tick=0;
 uint8_t Key_Press=0;
+uint8_t display_bat_stat=0;
 void UI_Print_Bat_Stat(uint8_t bat_stat)
 {
 const uint8_t* bat_bmp_ptr;
