@@ -1,11 +1,10 @@
 #include "UI.h"
 #include "UI_Array.h"
 //Status bar Icon
-const uint8_t Classroom_String[3][5]={{"7A105"},{"7A318"},{"7B208"}};
-uint8_t Key_Pressed=0;
-uint8_t Key_Pressed_Tick=0;
-uint8_t Key_Press=0;
+extern uint8_t Key_Pressed;
+extern bool Key_Hold;
 uint8_t display_bat_stat=0;
+extern bool UI_BAT_Charging;
 void UI_Print_Bat_Stat(uint8_t bat_stat)
 {
 const uint8_t* bat_bmp_ptr;
@@ -46,28 +45,104 @@ void UI_Clear_Below_Stat_Bar(void)
 }
 void UI_Main(void)
 {
+	UI_Clear_Below_Stat_Bar();
+	bool select_set=false;
+	OLED_R_ShowChinese(0,1,Signin_Chinese[0]);
+	OLED_R_ShowChinese(16,1,Signin_Chinese[2]);
+	OLED_ShowChinese(0,3,Setting_Chinese[0]);
+	OLED_ShowChinese(16,3,Setting_Chinese[2]);
 	while(1)
 	{
-		
+		uint8_t key=Get_Key();
+		if(key==Key_Down)
+		{
+			select_set=1;
+			OLED_ShowChinese(0,1,Signin_Chinese[0]);
+	OLED_ShowChinese(16,1,Signin_Chinese[2]);
+	OLED_R_ShowChinese(0,3,Setting_Chinese[0]);
+	OLED_R_ShowChinese(16,3,Setting_Chinese[2]);
+			select_set=true;
+		}
+		else if(key==Key_Up&&select_set==true)
+		{
+			OLED_R_ShowChinese(0,1,Signin_Chinese[0]);
+	OLED_R_ShowChinese(16,1,Signin_Chinese[2]);
+	OLED_ShowChinese(0,3,Setting_Chinese[0]);
+	OLED_ShowChinese(16,3,Setting_Chinese[2]);
+		}
+		else if(key==Key_OK)
+		{
+			if(select_set==true)
+			{
+				UI_Settings_Selection();
+			}
+				else
+				{
+			UI_Classroom_Selection();
+				}
+		}
+		else if(key==Key_X&&Key_Hold==true)
+		{
+			System_low_power(PWR_STDBY);
+		}
 	}
 }
-void Key_Handle(void)
+void UI_Classroom_Selection(void)
 {
-	uint8_t temp_key;
-	temp_key=Key_Scan();
-	if(temp_key!=Key_Press)
+	uint8_t select=0;
+	UI_Clear_Below_Stat_Bar();
+	OLED_R_ShowString(0,1,Classroom_String[0]);
+	OLED_ShowString(0,2,Classroom_String[1]);
+	OLED_ShowString(0,3,Classroom_String[2]);
+	while(1)
 	{
-		Key_Press=temp_key;
-		Key_Pressed_Tick=0;
+		uint8_t key=Get_Key();
+
+		if(key==Key_Down&&(select<2))
+		{
+			select++;
+			OLED_ShowString(0,(select-1)+1,Classroom_String[select-1]);
+			OLED_R_ShowString(0,select+1,Classroom_String[select]);
+		}
+		else if(key==Key_Up&&select>0)
+		{
+			select--;
+			OLED_ShowString(0,(select+1)+1,Classroom_String[select+1]);
+			OLED_R_ShowString(0,select+1,Classroom_String[select]);
+		}
+		else if(key==Key_X)
+		{
+			UI_Main();
+		}
+		else if(key==Key_OK)
+		{
+			UI_BT_Adverising(select);
+			OLED_R_ShowString(0,1,Classroom_String[0]);
+	OLED_ShowString(0,2,Classroom_String[1]);
+	OLED_ShowString(0,3,Classroom_String[2]);
+			select=0;
+		}
 	}
-	else
+}
+void UI_BT_Adverising(uint8_t select)
+{
+	UI_Clear_Below_Stat_Bar();
+	OLED_ShowString(0,1,Classroom_String[select]);
+	OLED_ShowString(0,2,"Started");
+	Start_beacon(BT_Classroom_Minor[select]);
+	while(1)
 	{
-		Key_Pressed_Tick++;
+		uint8_t key=Get_Key();
+		if(key==Key_X)
+		{
+			Stop_beacon();
+			UI_Classroom_Selection();
+		}
 	}
-	if(Key_Pressed_Tick>Key_Scan_Count)
-	{
-		Key_Pressed=Key_Press;
-	}
+}
+void UI_Settings_Selection(void)
+{
+	
 }
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {

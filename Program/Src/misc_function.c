@@ -5,10 +5,18 @@ uint16_t ADC_Value[3];
 bool ADC_Get_Value_Done=false;
 uint8_t ADC_Sample_Current_Channel=0;
 uint8_t ADC_Busy_Tick=0;
-uint8_t ADC_Action_Tick=0;
-bool UI_BAT_Charging=false
+uint16_t ADC_Action_Tick=0;
+uint8_t Key_Pressed=0;
+uint8_t Key_Last_Pressed=0;
+uint16_t Key_Pressed_Tick=0;
+uint8_t Key_Press=0;
+uint8_t Key_Last_Press=0;
+bool Key_Hold=false;
+extern uint8_t display_bat_stat;
+bool UI_BAT_Charging=false;
 uint8_t ADC_Get_Value(void)
 {
+	ADC1_Init();
 	if(ADC_Sample_Current_Channel!=0)
 	{
 		if(ADC_Busy_Tick>10)
@@ -43,50 +51,77 @@ uint8_t ADC_Get_Value(void)
 void ADC_Action(bool Is_Init)
 {
 	ADC_Action_Tick++;
-	if(ADC_Action_Tick>=10)
+	if(ADC_Action_Tick>=ADC_Sample_Tick_Start||Is_Init==true)
 	{
-		
+		ADC_Get_Value();
 	}
 }
-uint8_t Key_Scan(void)
+void Key_Scan(void)
 {
-	uint8_t temp_key=0;
+	Key_Press=0;
 	bool yes_key=0;
 	if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_3)==GPIO_PIN_RESET)
 	{
 		yes_key=true;
-		temp_key=Key_OK;
+		Key_Press=Key_OK;
+	}
+	else if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_2)==GPIO_PIN_RESET)
+	{
+		Key_Press=Key_Down;
+	}
+	else if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_1)==GPIO_PIN_RESET)
+	{
+		Key_Press=Key_Up;
 	}
 	if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0)==GPIO_PIN_SET)
 	{
 		if(yes_key==true)
 		{
-			temp_key=Key_RST_Combine;
+			Key_Press=Key_RST_Combine;
 		}
 		else
 		{
-			temp_key=Key_X;
+			Key_Press=Key_X;
 		}
 	}
-	else if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_2)==GPIO_PIN_RESET)
+	if(Key_Last_Press!=Key_Press)
 	{
-		temp_key=Key_Down;
+		Key_Pressed_Tick=0;
+		Key_Hold=false;
 	}
-	else if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_1)==GPIO_PIN_RESET)
+		Key_Pressed_Tick++;
+	if(Key_Pressed_Tick>=Key_Press_Count)
 	{
-		temp_key=Key_Up;
+		if(Key_Last_Pressed!=Key_Press)
+		{
+		Key_Pressed=Key_Press;
+		Key_Last_Pressed=Key_Pressed;
+		Key_Press=0;
+		}
+		else
+		{
+			if(Key_Pressed_Tick>=Key_Hold_Tick)
+			{
+			Key_Hold=true;
+			Key_Pressed=Key_Press;
+			}
+		}
 	}
-	else
-	{
-		temp_key=0;
-	}
-	return temp_key;
+	Key_Last_Press=Key_Press;
+}
+uint8_t Get_Key(void)
+{
+	uint8_t key;
+	key=Key_Pressed;
+	Key_Pressed=0;
+	return key;
 }
 void System_low_power(uint8_t low_power_type)
 {
 	switch(low_power_type)
 	{
 		case PWR_STDBY:
+			HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
 			HAL_PWR_EnterSTANDBYMode();
 	}
 }
@@ -124,7 +159,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 }
 		default:
 		{
-		HAL_ADC_DeInit(&hadc1);
+			ADC1_DeInit();
 			ADC_Sample_Current_Channel=0;
 			ADC_Busy_Tick=0;
 			ADC_Get_Value_Done=true;
@@ -148,9 +183,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 	else if(bat<=ADC_BAT_SHUTDOWN)
 	{
 		System_low_power(PWR_STDBY);
-	}
-	{
-		
 	}
 }
 }

@@ -29,10 +29,9 @@ extern TIM_HandleTypeDef htim4;
 
 int main(void)
 {
+
 	System_Startup_Init();
-ADC_Get_Value();
-	UI_Print_Bat_Stat(UI_BAT_HALF);
-	HAL_Delay(5000);
+	UI_Main();
 	//BT_Init();
 	//HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
 	//HAL_PWR_EnterSTANDBYMode();
@@ -50,6 +49,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if(htim->Instance==TIM4)//every 10ms action
 	{	
-		Key_Handle();
+		Key_Scan();
+		ADC_Action(false);
 	}
 }

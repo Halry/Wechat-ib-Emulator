@@ -20,5 +20,5 @@ void System_Startup_Init(void);
 void _Error_Handler(char * file, int line);
 void OverClock_to_HSE(void);
 void TIM4_Start(void);
-
+void ADC1_DeInit(void);
 #endif

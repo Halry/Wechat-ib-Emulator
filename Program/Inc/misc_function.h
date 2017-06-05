@@ -19,11 +19,21 @@
 #define PWR_STDBY 0
 #define PWR_SLEP 1
 #define PWR_STOP 2
+//Key Handle define
+#define Key_X 1
+#define Key_Up 2
+#define Key_Down 3
+#define Key_OK 4
+#define Key_RST_Combine 5
+#define Key_Press_Count 10
+#define Key_Hold_Tick 200
 extern bool UI_BAT_Charging;
 //ADC Value Define
 extern bool ADC_Get_Value_Done;
 extern uint16_t ADC_Value[3];
 uint8_t ADC_Get_Value(void);
-uint8_t Key_Scan(void);
+void Key_Scan(void);
 void System_low_power(uint8_t low_power_type);
+void ADC_Action(bool Is_Init);
+uint8_t Get_Key(void);
 #endif

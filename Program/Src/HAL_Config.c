@@ -139,6 +139,11 @@ HAL_NVIC_EnableIRQ(ADC1_IRQn);
     /**Configure Regular Channel 
     */
 }
+void ADC1_DeInit(void)
+{
+	HAL_NVIC_DisableIRQ(ADC1_IRQn);
+	HAL_ADC_DeInit(&hadc1);
+}
 /* RTC init function */
 void RTC_Init(void)
 {
@@ -359,10 +364,11 @@ void GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_15, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_14 
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_14 
                           |GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9, GPIO_PIN_RESET);
 													
 													HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,GPIO_PIN_SET);
+													
 HAL_NVIC_SetPriority(EXTI2_IRQn, 4, 0);//TP_CHRG Detect
 HAL_NVIC_EnableIRQ(EXTI2_IRQn);
 HAL_NVIC_SetPriority(EXTI4_IRQn, 4, 0);//TP_STDBY Detect
@@ -399,11 +405,13 @@ void System_Startup_Init(void)
 	//OverClock_to_HSE();
 	/* Initialize all configured peripherals */
   GPIO_Init();
-  ADC1_Init();
+
  //RTC_Init();
   SPI2_Init();
+	UI_Print_Bat_Stat(UI_BAT_EMPTY);
   //TIM2_Init();
   //TIM3_Init();
 	OLED_Init();
+		ADC_Action(true);
 	TIM4_Start();
 }

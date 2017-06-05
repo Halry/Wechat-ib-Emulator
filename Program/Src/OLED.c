@@ -1,5 +1,4 @@
 #include "OLED.h"
-extern SPI_HandleTypeDef hspi2;
 unsigned char F6x8[][6] =		
 {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,// sp
@@ -96,6 +95,8 @@ unsigned char F6x8[][6] =
 0x14, 0x14, 0x14, 0x14, 0x14, 0x14,// horiz lines
 };
 
+extern SPI_HandleTypeDef hspi2;
+
 	
 void OLED_DrawBMP(uint8_t x0, uint8_t y0,uint8_t x1, uint8_t y1,const uint8_t* BMP)
 { 	
@@ -171,7 +172,7 @@ void OLED_R_ShowString(uint8_t x,uint8_t y,const uint8_t *chr)
 	unsigned char j=0;
 	while (chr[j]!='\0')
 	{		OLED_R_ShowChar(x,y,chr[j]);
-			x+=8;
+			x+=6;
 		if(x>120){x=0;y+=2;}
 			j++;
 	}
@@ -192,8 +193,26 @@ void OLED_ShowChinese(uint8_t x,uint8_t y,const uint8_t *chinese)
 				addr+=1;
       }					
 }
+void OLED_R_ShowChinese(uint8_t x,uint8_t y,const uint8_t *chinese)
+{      			    
+	uint8_t addr=0;
+	OLED_Set_Pos(x,y);	
+    for(uint8_t t=0;t<16;t++)
+		{
+				OLED_WR_R_Byte(*(chinese+addr),OLED_DATA_FLAG);
+				addr+=1;
+     }	
+		OLED_Set_Pos(x,y+1);	
+    for(uint8_t t=0;t<16;t++)
+			{	
+				OLED_WR_R_Byte(*(chinese+addr),OLED_DATA_FLAG);
+				addr+=1;
+      }					
+}
+
 void OLED_Init(void)
 {
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);
 	OLED_RST_SET();
 	HAL_Delay(100);
 	OLED_RST_CLR();
@@ -249,4 +268,8 @@ void OLED_Clear(void)
 		OLED_WR_Byte (0x10,OLED_CMD_FLAG);        
 		for(n=0;n<128;n++)OLED_WR_Byte(0,OLED_DATA_FLAG); 
 	} 
+}
+void OLED_PowerOff()
+{
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
 }

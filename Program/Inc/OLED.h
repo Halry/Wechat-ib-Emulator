@@ -28,4 +28,6 @@ void OLED_R_ShowChar(uint8_t x,uint8_t y,uint8_t chr);
 void OLED_R_ShowString(uint8_t x,uint8_t y,const uint8_t *chr);
 void OLED_DrawBMP(uint8_t x0, uint8_t y0,uint8_t x1, uint8_t y1,const uint8_t* BMP);
 void OLED_ShowChinese(uint8_t x,uint8_t y,const uint8_t *chinese);
+void OLED_R_ShowChinese(uint8_t x,uint8_t y,const uint8_t *chinese);
+void OLED_PowerOff(void);
 #endif

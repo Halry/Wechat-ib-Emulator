@@ -4,7 +4,7 @@ extern RTC_HandleTypeDef hrtc;
 uint8_t const BT_Classroom_Minor[3][4]={{"5581"},{"55A6"},{"55D7"}};
 uint8_t *BT_UART_Receive_Data=NULL;
 uint8_t *BT_UART_Transmit_Data=NULL;
-uint8_t *BT_Last_Minor=NULL;
+char *BT_Last_Minor=NULL;
 uint8_t BT_Left_ADV_Count=0;
 void BT_Init()
 {
@@ -126,7 +126,7 @@ void BT_Init()
 		USART1_DeInit();
 	}
 } 
-void Start_beacon(const uint8_t *minor)
+void Start_beacon(const char *minor)
 {
 	BT_Power_Control(true);
 		USART1_Init();
@@ -167,7 +167,7 @@ void Start_beacon(const uint8_t *minor)
 		}
 		free(BT_UART_Receive_Data);
 		free(BT_UART_Transmit_Data);
-		BT_Last_Minor=minor;
+BT_Last_Minor=(char *)minor;
 		BT_Write_Setup_BKP();
 		USART1_DeInit();
 }
