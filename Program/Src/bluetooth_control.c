@@ -5,10 +5,11 @@ bool bluetooth_inited=false;
 uint8_t const BT_Classroom_Minor[3][4]={{"5581"},{"55A6"},{"55D7"}};
 uint8_t *BT_UART_Receive_Data=NULL;
 uint8_t *BT_UART_Transmit_Data=NULL;
-uint8_t *BT_Last_Minor=NULL;
+uint8_t BT_Last_Classroom=0;
+uint8_t BT_Left_ADV_Count=0;
 void BT_Init()
 {
-	BT_Read_Setup_BKP();
+	BT_Read_Setup_BKP(false);
 	//read out bluetooth inited and last time minor from bkp
 	if(bluetooth_inited==false)
 	{
@@ -206,7 +207,7 @@ void BT_Power_Control(bool power)
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_6,GPIO_PIN_RESET);//Wakeup Module
 		}
 }
-void BT_Read_Setup_BKP(void)
+void BT_Read_Setup_BKP(bool Setup)
 {
 	if((BT_Last_Minor=malloc(4))==NULL)
 		{

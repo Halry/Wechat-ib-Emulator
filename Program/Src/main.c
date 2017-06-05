@@ -33,6 +33,7 @@ int main(void)
 //ADC_Get_Value();
 	UI_Print_Bat_Stat(UI_BAT_HALF);
 	BT_Init();
+	BT_Init();
 	Start_beacon(BT_Classroom_Minor[1]);
 
   while (1)
