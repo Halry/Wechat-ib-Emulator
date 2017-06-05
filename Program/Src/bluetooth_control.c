@@ -6,14 +6,15 @@ uint8_t *BT_UART_Receive_Data=NULL;
 uint8_t *BT_UART_Transmit_Data=NULL;
 void BT_Init()
 {
-	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_0,GPIO_PIN_SET);
+	//read out bluetooth inited and last time minor from bkp
+	
+	if(bluetooth_inited==false)
+	{
+		HAL_GPIO_WritePin(GPIOB,GPIO_PIN_0,GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_7,GPIO_PIN_SET);//Set Connection Ctr pin to high
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_6,GPIO_PIN_RESET);//Wakeup Module
 	HAL_Delay(500);
-	//read out bluetooth inited from bkp
-	if(bluetooth_inited==false)
-	{
 		USART1_Init();
 		if((BT_UART_Receive_Data=malloc(4))==NULL)
 		{
@@ -121,7 +122,6 @@ void BT_Init()
 		free(BT_UART_Receive_Data);
 		USART1_DeInit();
 	}
-	
 } 
 void Start_beacon(const uint8_t *minor)
 {
@@ -157,19 +157,13 @@ void Start_beacon(const uint8_t *minor)
 		{
 					HAL_UART_DeInit(&huart1);//Display error
 		}
+		free(BT_UART_Receive_Data);
 		free(BT_UART_Transmit_Data);
 		USART1_DeInit();
 }
 void Stop_beacon(void)
 {
 	USART1_Init();
-}
-void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
-{
-	OLED_Clear();
-	OLED_ShowString(0,0,"Fatal Err:UART_STACK");
-	while(1)
-	{
 		if((BT_UART_Receive_Data=malloc(4))==NULL)
 		{
 			Error_Handler();
@@ -182,13 +176,20 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 		{
 			Error_Handler();
 		}
-		HAL_UART_Transmit(&huart1,"AT+ADVEN1",9,0xFF);//Disable Advertising
+		HAL_UART_Transmit(&huart1,"AT+ADVEN0",9,0xFF);//Disable Advertising
 		HAL_Delay(100);
 		if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
 		{
 					HAL_UART_DeInit(&huart1);//Display error
 		}
-	}
+		free(BT_UART_Receive_Data);
+		free(BT_UART_Transmit_Data);
+		USART1_DeInit();
+}
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+	OLED_Clear();
+	OLED_ShowString(0,0,"Fatal Err:UART_STACK");
 }
 void USART1_Init(void)
 {
