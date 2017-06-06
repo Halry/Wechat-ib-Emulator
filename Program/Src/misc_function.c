@@ -39,7 +39,7 @@ uint8_t ADC_Get_Value(void)
 	}
 	sConfig.Channel = ADC_CHANNEL_VREFINT;
   sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_13CYCLES_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -100,7 +100,7 @@ void Key_Scan(void)
 		}
 		else
 		{
-			if(Key_Pressed_Tick>=Key_Hold_Tick)
+			if(Key_Pressed_Tick>=Key_Hold_Tick&&Key_Press!=0)
 			{
 			Key_Hold=true;
 			Key_Pressed=Key_Press;
@@ -129,6 +129,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	ADC_Value[ADC_Sample_Current_Channel]=HAL_ADC_GetValue(&hadc1);
 	HAL_ADC_Stop_IT(&hadc1);
+	
 	switch(ADC_Sample_Current_Channel)
 	{
 		case(ADC_Bat_Channel_Value-1):

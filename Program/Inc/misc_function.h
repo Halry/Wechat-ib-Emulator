@@ -25,8 +25,8 @@
 #define Key_Down 3
 #define Key_OK 4
 #define Key_RST_Combine 5
-#define Key_Press_Count 10
-#define Key_Hold_Tick 200
+#define Key_Press_Count 3
+#define Key_Hold_Tick 250
 extern bool UI_BAT_Charging;
 //ADC Value Define
 extern bool ADC_Get_Value_Done;

@@ -1,4 +1,4 @@
-#include "hAL_Config.h"
+#include "HAL_Config.h"
 ADC_HandleTypeDef hadc1;
 RTC_HandleTypeDef hrtc;
 SPI_HandleTypeDef hspi2;
@@ -405,7 +405,23 @@ void System_Startup_Init(void)
 	//OverClock_to_HSE();
 	/* Initialize all configured peripherals */
   GPIO_Init();
-
+if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0)==GPIO_PIN_SET)
+{
+	HAL_Delay(2000);
+	{
+		if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0)==GPIO_PIN_SET)
+{
+	//go on
+}
+else
+{
+	System_low_power(PWR_STDBY);
+}
+	}
+}else
+{
+	//System_low_power(PWR_STDBY);
+}
  //RTC_Init();
   SPI2_Init();
 	UI_Print_Bat_Stat(UI_BAT_EMPTY);
@@ -414,4 +430,5 @@ void System_Startup_Init(void)
 	OLED_Init();
 		ADC_Action(true);
 	TIM4_Start();
+	BT_Init();
 }

@@ -5,6 +5,7 @@ extern uint8_t Key_Pressed;
 extern bool Key_Hold;
 uint8_t display_bat_stat=0;
 extern bool UI_BAT_Charging;
+extern uint16_t BT_Left_ADV_Count;
 void UI_Print_Bat_Stat(uint8_t bat_stat)
 {
 const uint8_t* bat_bmp_ptr;
@@ -45,15 +46,25 @@ void UI_Clear_Below_Stat_Bar(void)
 }
 void UI_Main(void)
 {
+	uint8_t key;
 	UI_Clear_Below_Stat_Bar();
 	bool select_set=false;
 	OLED_R_ShowChinese(0,1,Signin_Chinese[0]);
 	OLED_R_ShowChinese(16,1,Signin_Chinese[2]);
 	OLED_ShowChinese(0,3,Setting_Chinese[0]);
 	OLED_ShowChinese(16,3,Setting_Chinese[2]);
+	uint8_t *bt_left_adv_count_disp=malloc(4);
+	uint8_t bt_left_adv_count_high=((BT_Left_ADV_Count/100)%10)+'0';
+	memcpy(bt_left_adv_count_disp,&bt_left_adv_count_high,1);
+	uint8_t bt_left_adv_count_mid=((BT_Left_ADV_Count/10)%10)+'0';
+	memcpy(bt_left_adv_count_disp+1,&bt_left_adv_count_mid,1);
+	uint8_t bt_left_adv_count_low=((BT_Left_ADV_Count)%10)+'0';
+	memcpy(bt_left_adv_count_disp+2,&bt_left_adv_count_low,1);
+	OLED_ShowString(0,0,bt_left_adv_count_disp);
+free(bt_left_adv_count_disp);
 	while(1)
 	{
-		uint8_t key=Get_Key();
+		key=Get_Key();
 		if(key==Key_Down)
 		{
 			select_set=1;
@@ -69,12 +80,13 @@ void UI_Main(void)
 	OLED_R_ShowChinese(16,1,Signin_Chinese[2]);
 	OLED_ShowChinese(0,3,Setting_Chinese[0]);
 	OLED_ShowChinese(16,3,Setting_Chinese[2]);
+			select_set=false;
 		}
 		else if(key==Key_OK)
 		{
 			if(select_set==true)
 			{
-				UI_Settings_Selection();
+				//UI_Settings_Selection();
 			}
 				else
 				{
@@ -89,6 +101,7 @@ void UI_Main(void)
 }
 void UI_Classroom_Selection(void)
 {
+	uint8_t key;
 	uint8_t select=0;
 	UI_Clear_Below_Stat_Bar();
 	OLED_R_ShowString(0,1,Classroom_String[0]);
@@ -96,9 +109,9 @@ void UI_Classroom_Selection(void)
 	OLED_ShowString(0,3,Classroom_String[2]);
 	while(1)
 	{
-		uint8_t key=Get_Key();
+		key=Get_Key();
 
-		if(key==Key_Down&&(select<2))
+		if(key==Key_Down&&(select<(Max_Classroom_Count-1)))
 		{
 			select++;
 			OLED_ShowString(0,(select-1)+1,Classroom_String[select-1]);
@@ -117,16 +130,18 @@ void UI_Classroom_Selection(void)
 		else if(key==Key_OK)
 		{
 			UI_BT_Adverising(select);
-			OLED_R_ShowString(0,1,Classroom_String[0]);
-	OLED_ShowString(0,2,Classroom_String[1]);
-	OLED_ShowString(0,3,Classroom_String[2]);
-			select=0;
 		}
 	}
 }
 void UI_BT_Adverising(uint8_t select)
 {
+	if(select>(Max_Classroom_Count-1))
+	{
+		UI_Classroom_Selection();
+	}
 	UI_Clear_Below_Stat_Bar();
+	if(BT_Left_ADV_Count>0)
+	{
 	OLED_ShowString(0,1,Classroom_String[select]);
 	OLED_ShowString(0,2,"Started");
 	Start_beacon(BT_Classroom_Minor[select]);
@@ -135,14 +150,58 @@ void UI_BT_Adverising(uint8_t select)
 		uint8_t key=Get_Key();
 		if(key==Key_X)
 		{
+			
 			Stop_beacon();
-			UI_Classroom_Selection();
+			UI_Main();
 		}
+	}
+}
+	else
+	{
+		OLED_ShowString(0,1,"Counter Error:00");
 	}
 }
 void UI_Settings_Selection(void)
 {
-	
+	uint8_t select=0;
+	uint8_t key;
+		UI_Clear_Below_Stat_Bar();
+	const uint8_t *Chinese_ptr[3]={(((uint8_t* )*Time_Setting_Chinese)),(((uint8_t* )DFU_Update_Chinese)),(((uint8_t* )Version_Chinese))};
+	OLED_R_ShowChinese(0,1,Chinese_ptr[0]);
+	OLED_R_ShowChinese(16,1,&((Chinese_ptr[0])[2]));
+	OLED_ShowChinese(0,3,DFU_Update_Chinese[0]);
+	OLED_ShowChinese(16,3,DFU_Update_Chinese[2]);
+	OLED_ShowChinese(32,3,DFU_Update_Chinese[4]);
+	OLED_ShowChinese(48,3,DFU_Update_Chinese[6]);
+	OLED_ShowChinese(0,5,Version_Chinese[0]);
+	OLED_ShowChinese(16,5,Version_Chinese[2]);
+	while(1)
+	{
+//		key=Get_Key();
+//		if(key==Key_Down&&(select<=2))
+//		{
+//			select++;
+//			OLED_ShowString(0,(select-1)+1,Classroom_String[select-1]);
+//			OLED_R_ShowString(0,select+1,Classroom_String[select]);
+//		}
+//		else if(key==Key_Up&&select>0)
+//		{
+//			select--;
+//			OLED_ShowString(0,(select+1)+1,Classroom_String[select+1]);
+//			OLED_R_ShowString(0,select+1,Classroom_String[select]);
+//		}
+//		else if(key==Key_X)
+//		{
+//			UI_Main();
+//		}
+//		else if(key==Key_OK)
+//		{
+//			UI_BT_Adverising(select);
+//			OLED_R_ShowString(0,1,Classroom_String[0]);
+//	OLED_ShowString(0,2,Classroom_String[1]);
+//	OLED_ShowString(0,3,Classroom_String[2]);
+//		}
+	}
 }
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
