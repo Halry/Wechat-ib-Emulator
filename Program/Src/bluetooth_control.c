@@ -26,7 +26,7 @@ void BT_Init()
 			Error_Handler();
 		}
 		HAL_UART_Transmit(&huart1,"AT+HOSTEN3",10,0xFF);
-		HAL_Delay(100);
+		HAL_Delay(200);
 		if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
 		{
 					HAL_UART_DeInit(&huart1);//Display error
@@ -38,7 +38,7 @@ void BT_Init()
 		}
 		memset(BT_UART_Receive_Data,'\0',4);
 		HAL_UART_Transmit(&huart1,"AT+POWR3",8,0xFF);
-		HAL_Delay(100);
+		HAL_Delay(200);
 		if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
 		{
 					HAL_UART_DeInit(&huart1);//Display error
@@ -49,7 +49,7 @@ void BT_Init()
 			Error_Handler();
 		}
 		HAL_UART_Transmit(&huart1,"AT+STRUUIDFDA50693A4E24FB1AFCFC6EB07647825",42,0xFF);//Set the uuid to wechat
-		HAL_Delay(100);
+		HAL_Delay(200);
 		if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
 		{
 					HAL_UART_DeInit(&huart1);//Display error
@@ -60,7 +60,7 @@ void BT_Init()
 			Error_Handler();
 		}
 		HAL_UART_Transmit(&huart1,"AT+MAJOR0000",12,0xFF);//Reset the minor to 0x2773
-		HAL_Delay(100);
+		HAL_Delay(200);
 		if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
 		{
 					HAL_UART_DeInit(&huart1);//Display error
@@ -71,7 +71,7 @@ void BT_Init()
 			Error_Handler();
 		}
 		HAL_UART_Transmit(&huart1,"AT+MINOR0000",12,0xFF);//Reset the minor to 0x0000
-		HAL_Delay(100);
+		HAL_Delay(200);
 			if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
 		{
 					HAL_UART_DeInit(&huart1);//Display error
@@ -82,7 +82,7 @@ void BT_Init()
 			Error_Handler();
 		}
 		HAL_UART_Transmit(&huart1,"AT+ADVIN0",9,0xFF);//Set the boardcast time to 100ms(faster advertising)
-		HAL_Delay(100);
+		HAL_Delay(200);
 		if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
 		{
 					HAL_UART_DeInit(&huart1);//Display error
@@ -93,7 +93,7 @@ void BT_Init()
 			Error_Handler();
 		}
 		HAL_UART_Transmit(&huart1,"AT+ISCEN2",9,0xFF);//Reset the minor to 0x0000
-		HAL_Delay(100);
+		HAL_Delay(200);
 			if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
 		{
 					HAL_UART_DeInit(&huart1);//Display error
@@ -104,7 +104,7 @@ void BT_Init()
 			Error_Handler();
 		}
 		HAL_UART_Transmit(&huart1,"AT+PASS172839",13,0xFF);//Reset the minor to 0x0000
-		HAL_Delay(100);
+		HAL_Delay(200);
 			if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
 		{
 					HAL_UART_DeInit(&huart1);//Display error
@@ -115,7 +115,7 @@ void BT_Init()
 			Error_Handler();
 		}
 		HAL_UART_Transmit(&huart1,"AT+ADVEN0",9,0xFF);//Disable advertising
-		HAL_Delay(100);
+		HAL_Delay(200);
 			if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
 		{
 					HAL_UART_DeInit(&huart1);//Display error
@@ -146,15 +146,15 @@ void Start_beacon(const char *minor)
 		{
 			Error_Handler();
 		}
-		
+		 __HAL_UART_FLUSH_DRREGISTER(&huart1); 
 			HAL_UART_Transmit(&huart1,"AT+MAJOR2773",12,0xFF);
-			HAL_Delay(200);
+			HAL_Delay(300);
 		if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
 		{
 					HAL_UART_DeInit(&huart1);//Display error
 		}
+		 __HAL_UART_FLUSH_DRREGISTER(&huart1); 
 		memset(BT_UART_Receive_Data,'\0',4);
-		
 		memcpy(BT_UART_Transmit_Data,"AT+MINOR",8);
 		memcpy(BT_UART_Transmit_Data+8,minor,4);
 			if(HAL_UART_Receive_IT(&huart1,BT_UART_Receive_Data,4)==HAL_ERROR)
@@ -162,11 +162,12 @@ void Start_beacon(const char *minor)
 			Error_Handler();
 		}
 		HAL_UART_Transmit(&huart1,BT_UART_Transmit_Data,12,0xFF);//Reset the minor to 0x0000
-		HAL_Delay(200);
+		HAL_Delay(300);
 			if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
 		{
 					HAL_UART_DeInit(&huart1);//Display error
 		}
+		 __HAL_UART_FLUSH_DRREGISTER(&huart1); 
 		memset(BT_UART_Receive_Data,'\0',4);
 	
 		if(HAL_UART_Receive_IT(&huart1,BT_UART_Receive_Data,4)==HAL_ERROR)
@@ -175,7 +176,7 @@ void Start_beacon(const char *minor)
 		}
 	}
 		HAL_UART_Transmit(&huart1,"AT+ADVEN1",9,0xFF);//Enable Advertising
-		HAL_Delay(200);
+		HAL_Delay(300);
 			if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
 		{
 					HAL_UART_DeInit(&huart1);//Display error
@@ -202,8 +203,9 @@ void Stop_beacon(void)
 		{
 			Error_Handler();
 		}
+		 __HAL_UART_FLUSH_DRREGISTER(&huart1); 
 		HAL_UART_Transmit(&huart1,"AT+ADVEN0",9,0xFF);//Disable Advertising
-		HAL_Delay(200);
+		HAL_Delay(300);
 		if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
 		{
 					HAL_UART_DeInit(&huart1);//Display error
@@ -220,7 +222,7 @@ void BT_Power_Control(bool power)
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_7,GPIO_PIN_SET);//Set Connection Ctr pin to high
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_6,GPIO_PIN_RESET);//Wakeup Module
-	HAL_Delay(500);
+	HAL_Delay(300);
 		}
 		else
 		{
@@ -258,7 +260,8 @@ void BT_Write_Setup_BKP(void)
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
 	OLED_Clear();
-	OLED_ShowString(0,1,"Fatal Err:UART_STACK");
+	OLED_ShowString(0,1,"Fatal Err:UART_STACK",false);
+	while(1);
 }
 void USART1_Init(void)
 {
@@ -277,6 +280,7 @@ void USART1_Init(void)
   }
 	HAL_NVIC_SetPriority(USART1_IRQn,0,0);
 HAL_NVIC_EnableIRQ(USART1_IRQn);
+	
 }
 void USART1_DeInit(void)
 {

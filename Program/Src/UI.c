@@ -44,15 +44,8 @@ void UI_Clear_Below_Stat_Bar(void)
 		for(uint8_t n=0;n<128;n++)OLED_WR_Byte(0,OLED_DATA_FLAG); 
 	} 
 }
-void UI_Main(void)
+void UI_Update_Left_Count(void)
 {
-	uint8_t key;
-	UI_Clear_Below_Stat_Bar();
-	bool select_set=false;
-	OLED_R_ShowChinese(0,1,Signin_Chinese[0]);
-	OLED_R_ShowChinese(16,1,Signin_Chinese[2]);
-	OLED_ShowChinese(0,3,Setting_Chinese[0]);
-	OLED_ShowChinese(16,3,Setting_Chinese[2]);
 	uint8_t *bt_left_adv_count_disp=malloc(4);
 	uint8_t bt_left_adv_count_high=((BT_Left_ADV_Count/100)%10)+'0';
 	memcpy(bt_left_adv_count_disp,&bt_left_adv_count_high,1);
@@ -60,33 +53,46 @@ void UI_Main(void)
 	memcpy(bt_left_adv_count_disp+1,&bt_left_adv_count_mid,1);
 	uint8_t bt_left_adv_count_low=((BT_Left_ADV_Count)%10)+'0';
 	memcpy(bt_left_adv_count_disp+2,&bt_left_adv_count_low,1);
-	OLED_ShowString(0,0,bt_left_adv_count_disp);
-free(bt_left_adv_count_disp);
+	OLED_ShowString(0,0,bt_left_adv_count_disp,false);
+  free(bt_left_adv_count_disp);
+}
+void UI_Main(void)
+{
+	uint8_t key;
+	UI_Clear_Below_Stat_Bar();
+	bool select_settings=false;
+		const uint8_t *Chinese_ptr[2]={Signin_Chinese[0],Setting_Chinese[0]};
+
+	OLED_R_ShowChinese(0,1,Chinese_ptr[0]);
+	//OLED_R_ShowChinese(16,1,Signin_Chinese[2]);
+	OLED_ShowChinese(0,3,Chinese_ptr[1]);
+	//OLED_ShowChinese(16,3,Setting_Chinese[2]);
+	//Display Left Count
+	UI_Update_Left_Count();
 	while(1)
 	{
 		key=Get_Key();
 		if(key==Key_Down)
 		{
-			select_set=1;
 			OLED_ShowChinese(0,1,Signin_Chinese[0]);
 	OLED_ShowChinese(16,1,Signin_Chinese[2]);
 	OLED_R_ShowChinese(0,3,Setting_Chinese[0]);
 	OLED_R_ShowChinese(16,3,Setting_Chinese[2]);
-			select_set=true;
+			select_settings=true;
 		}
-		else if(key==Key_Up&&select_set==true)
+		else if(key==Key_Up&&select_settings==true)
 		{
 			OLED_R_ShowChinese(0,1,Signin_Chinese[0]);
 	OLED_R_ShowChinese(16,1,Signin_Chinese[2]);
 	OLED_ShowChinese(0,3,Setting_Chinese[0]);
 	OLED_ShowChinese(16,3,Setting_Chinese[2]);
-			select_set=false;
+			select_settings=false;
 		}
 		else if(key==Key_OK)
 		{
-			if(select_set==true)
+			if(select_settings==true)
 			{
-				//UI_Settings_Selection();
+			//	UI_Settings_Selection();
 			}
 				else
 				{
@@ -103,25 +109,36 @@ void UI_Classroom_Selection(void)
 {
 	uint8_t key;
 	uint8_t select=0;
+	bool displayed=false;
 	UI_Clear_Below_Stat_Bar();
-	OLED_R_ShowString(0,1,Classroom_String[0]);
-	OLED_ShowString(0,2,Classroom_String[1]);
-	OLED_ShowString(0,3,Classroom_String[2]);
+
 	while(1)
 	{
+		if(displayed==false)
+		{
+			for(uint8_t i=0;i<(Max_Classroom_Count-1);i++)
+	{
+		if(i==select)
+		{
+				OLED_R_ShowString(0,(i+1),Classroom_String[i],true);
+		}
+		else
+		{
+			OLED_ShowString(0,(i+1),Classroom_String[i],true);
+		}
+	}
+		}
 		key=Get_Key();
 
 		if(key==Key_Down&&(select<(Max_Classroom_Count-1)))
 		{
 			select++;
-			OLED_ShowString(0,(select-1)+1,Classroom_String[select-1]);
-			OLED_R_ShowString(0,select+1,Classroom_String[select]);
+			displayed=false;
 		}
 		else if(key==Key_Up&&select>0)
 		{
 			select--;
-			OLED_ShowString(0,(select+1)+1,Classroom_String[select+1]);
-			OLED_R_ShowString(0,select+1,Classroom_String[select]);
+			displayed=false;
 		}
 		else if(key==Key_X)
 		{
@@ -142,8 +159,8 @@ void UI_BT_Adverising(uint8_t select)
 	UI_Clear_Below_Stat_Bar();
 	if(BT_Left_ADV_Count>0)
 	{
-	OLED_ShowString(0,1,Classroom_String[select]);
-	OLED_ShowString(0,2,"Started");
+	OLED_ShowString(0,1,Classroom_String[select],true);
+		OLED_ShowChinese(40,1,Started_Chinese[0]);
 	Start_beacon(BT_Classroom_Minor[select]);
 	while(1)
 	{
@@ -158,7 +175,7 @@ void UI_BT_Adverising(uint8_t select)
 }
 	else
 	{
-		OLED_ShowString(0,1,"Counter Error:00");
+		OLED_ShowChinese(0,1,Left_Not_Enough[0]);
 	}
 }
 void UI_Settings_Selection(void)
@@ -168,13 +185,7 @@ void UI_Settings_Selection(void)
 		UI_Clear_Below_Stat_Bar();
 	const uint8_t *Chinese_ptr[3]={(((uint8_t* )*Time_Setting_Chinese)),(((uint8_t* )DFU_Update_Chinese)),(((uint8_t* )Version_Chinese))};
 	OLED_R_ShowChinese(0,1,Chinese_ptr[0]);
-	OLED_R_ShowChinese(16,1,&((Chinese_ptr[0])[2]));
-	OLED_ShowChinese(0,3,DFU_Update_Chinese[0]);
-	OLED_ShowChinese(16,3,DFU_Update_Chinese[2]);
-	OLED_ShowChinese(32,3,DFU_Update_Chinese[4]);
-	OLED_ShowChinese(48,3,DFU_Update_Chinese[6]);
-	OLED_ShowChinese(0,5,Version_Chinese[0]);
-	OLED_ShowChinese(16,5,Version_Chinese[2]);
+
 	while(1)
 	{
 //		key=Get_Key();

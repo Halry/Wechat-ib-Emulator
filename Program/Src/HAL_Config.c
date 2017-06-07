@@ -118,11 +118,9 @@ HAL_RCC_GetHCLKFreq();
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
 }
-/* ADC1 init function */
+/* ADC1 function */
 void ADC1_Init(void)
 {
-    /**Common config 
-    */
   hadc1.Instance = ADC1;
   hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
@@ -134,10 +132,8 @@ void ADC1_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-	HAL_NVIC_SetPriority(ADC1_IRQn,2,0);
+	HAL_NVIC_SetPriority(ADC1_IRQn,1,0);
 HAL_NVIC_EnableIRQ(ADC1_IRQn);
-    /**Configure Regular Channel 
-    */
 }
 void ADC1_DeInit(void)
 {
@@ -424,7 +420,7 @@ else
 }
  //RTC_Init();
   SPI2_Init();
-	UI_Print_Bat_Stat(UI_BAT_EMPTY);
+	//UI_Print_Bat_Stat(UI_BAT_EMPTY);
   //TIM2_Init();
   //TIM3_Init();
 	OLED_Init();

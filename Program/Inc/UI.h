@@ -15,5 +15,5 @@ void UI_Main(void);
 void UI_Classroom_Selection(void);
 void UI_Settings_Selection(void);
 void UI_BT_Adverising(uint8_t select);
-
+void UI_Update_Left_Count(void);
 #endif
