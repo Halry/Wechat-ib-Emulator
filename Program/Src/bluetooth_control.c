@@ -1,7 +1,7 @@
 #include "bluetooth_control.h"
 extern UART_HandleTypeDef huart1;
 extern RTC_HandleTypeDef hrtc;
-uint8_t const BT_Classroom_Minor[3][4]={{"5581"},{"55A6"},{"55D7"}};
+uint8_t const BT_Classroom_Minor[3][4]={{"55AB"},{"55A6"},{"55D7"}};
 uint8_t *BT_UART_Receive_Data=NULL;
 uint8_t *BT_UART_Transmit_Data=NULL;
 char *BT_Last_Minor=NULL;

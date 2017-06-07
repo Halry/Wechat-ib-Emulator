@@ -61,12 +61,11 @@ void UI_Main(void)
 	uint8_t key;
 	UI_Clear_Below_Stat_Bar();
 	bool select_settings=false;
+	bool displayed=false;
 		const uint8_t *Chinese_ptr[2]={Signin_Chinese[0],Setting_Chinese[0]};
 
 	OLED_R_ShowChinese(0,1,Chinese_ptr[0]);
-	//OLED_R_ShowChinese(16,1,Signin_Chinese[2]);
 	OLED_ShowChinese(0,3,Chinese_ptr[1]);
-	//OLED_ShowChinese(16,3,Setting_Chinese[2]);
 	//Display Left Count
 	UI_Update_Left_Count();
 	while(1)
@@ -74,25 +73,21 @@ void UI_Main(void)
 		key=Get_Key();
 		if(key==Key_Down)
 		{
-			OLED_ShowChinese(0,1,Signin_Chinese[0]);
-	OLED_ShowChinese(16,1,Signin_Chinese[2]);
-	OLED_R_ShowChinese(0,3,Setting_Chinese[0]);
-	OLED_R_ShowChinese(16,3,Setting_Chinese[2]);
+			OLED_R_ShowChinese(0,3,Chinese_ptr[1]);
+			OLED_ShowChinese(0,1,Chinese_ptr[0]);
 			select_settings=true;
 		}
 		else if(key==Key_Up&&select_settings==true)
 		{
-			OLED_R_ShowChinese(0,1,Signin_Chinese[0]);
-	OLED_R_ShowChinese(16,1,Signin_Chinese[2]);
-	OLED_ShowChinese(0,3,Setting_Chinese[0]);
-	OLED_ShowChinese(16,3,Setting_Chinese[2]);
+				OLED_R_ShowChinese(0,1,Chinese_ptr[0]);
+	OLED_ShowChinese(0,3,Chinese_ptr[1]);
 			select_settings=false;
 		}
 		else if(key==Key_OK)
 		{
 			if(select_settings==true)
 			{
-			//	UI_Settings_Selection();
+				UI_Settings_Selection();
 			}
 				else
 				{
@@ -101,7 +96,22 @@ void UI_Main(void)
 		}
 		else if(key==Key_X&&Key_Hold==true)
 		{
-			System_low_power(PWR_STDBY);
+			UI_Clear_Below_Stat_Bar();
+			OLED_ShowChinese(0,0,Sure_Power_Off[0]);
+			OLED_ShowString(64,0,"?",true);
+			while(1)
+			{
+				key=Get_Key();
+				if(key==Key_OK)
+				{
+					System_low_power(PWR_STDBY);
+				}
+				else if(key==Key_X)
+				{
+					UI_Main();
+				}
+			}
+			
 		}
 	}
 }
@@ -114,21 +124,26 @@ void UI_Classroom_Selection(void)
 
 	while(1)
 	{
+		key=Get_Key();
 		if(displayed==false)
 		{
-			for(uint8_t i=0;i<(Max_Classroom_Count-1);i++)
+			for(uint8_t i=0;i<Max_Classroom_Count;i++)
 	{
 		if(i==select)
 		{
-				OLED_R_ShowString(0,(i+1),Classroom_String[i],true);
+
+				OLED_R_ShowString(0,i+i+1,Classroom_String[i],true);
+
 		}
 		else
 		{
-			OLED_ShowString(0,(i+1),Classroom_String[i],true);
+			
+				OLED_ShowString(0,i+i+1,Classroom_String[i],true);
 		}
 	}
+	displayed=true;
 		}
-		key=Get_Key();
+		
 
 		if(key==Key_Down&&(select<(Max_Classroom_Count-1)))
 		{
@@ -183,9 +198,7 @@ void UI_Settings_Selection(void)
 	uint8_t select=0;
 	uint8_t key;
 		UI_Clear_Below_Stat_Bar();
-	const uint8_t *Chinese_ptr[3]={(((uint8_t* )*Time_Setting_Chinese)),(((uint8_t* )DFU_Update_Chinese)),(((uint8_t* )Version_Chinese))};
-	OLED_R_ShowChinese(0,1,Chinese_ptr[0]);
-
+	const uint8_t *Chinese_ptr[3]={Time_Setting_Chinese[0],DFU_Update_Chinese[0],Version_Chinese[0]};
 	while(1)
 	{
 //		key=Get_Key();
