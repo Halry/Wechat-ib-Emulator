@@ -96,24 +96,38 @@ void UI_Main(void)
 		}
 		else if(key==Key_X&&Key_Hold==true)
 		{
-			UI_Clear_Below_Stat_Bar();
-			OLED_ShowChinese(0,0,Sure_Power_Off[0]);
-			OLED_ShowString(64,0,"?",true);
-			while(1)
+		UI_Power_Off();
+			
+		}
+	}
+}
+void UI_Power_Off(void)
+{
+	uint8_t key;
+	UI_Clear_Below_Stat_Bar();
+			OLED_ShowChinese(0,1,Sure_Power_Off[0]);
+			OLED_ShowString(64,1,"?",true);
+	uint16_t ticks=HAL_GetTick();
+	bool key_released=false;
+		while(1)
 			{
 				key=Get_Key();
 				if(key==Key_OK)
 				{
 					System_low_power(PWR_STDBY);
 				}
-				else if(key==Key_X)
+				else if(key==0)
+				{
+					if(HAL_GetTick()-ticks>1000)
+					{
+					key_released=true;
+					}
+				}
+				else if(key==Key_X&&key_released==true)
 				{
 					UI_Main();
 				}
 			}
-			
-		}
-	}
 }
 void UI_Classroom_Selection(void)
 {

@@ -2,13 +2,13 @@
 extern UART_HandleTypeDef huart1;
 extern RTC_HandleTypeDef hrtc;
 uint8_t const BT_Classroom_Minor[3][4]={{"55AB"},{"55A6"},{"55D7"}};
-uint8_t *BT_UART_Receive_Data=NULL;
 uint8_t *BT_UART_Transmit_Data=NULL;
+uint8_t *BT_UART_Receive_Data=NULL;
 char *BT_Last_Minor=NULL;
-uint16_t BT_Left_ADV_Count=0;
+uint16_t BT_Left_ADV_Count=50;
 void BT_Init()
 {
-	//HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR8,BT_Left_ADV_Count);
+	HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR8,BT_Left_ADV_Count);
 	uint8_t null_minor[4];
 	memset(null_minor,'\0',4);
 	BT_Read_Setup_BKP();
@@ -202,8 +202,7 @@ void Stop_beacon(void)
 		if(HAL_UART_Receive_IT(&huart1,BT_UART_Receive_Data,4)==HAL_ERROR)
 		{
 			Error_Handler();
-		}
-		 __HAL_UART_FLUSH_DRREGISTER(&huart1); 
+		} 
 		HAL_UART_Transmit(&huart1,"AT+ADVEN0",9,0xFF);//Disable Advertising
 		HAL_Delay(300);
 		if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
@@ -222,7 +221,7 @@ void BT_Power_Control(bool power)
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_7,GPIO_PIN_SET);//Set Connection Ctr pin to high
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_6,GPIO_PIN_RESET);//Wakeup Module
-	HAL_Delay(300);
+	HAL_Delay(500);
 		}
 		else
 		{
@@ -231,6 +230,10 @@ void BT_Power_Control(bool power)
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_7,GPIO_PIN_RESET);//Set Connection Ctr pin to high
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_6,GPIO_PIN_RESET);//Wakeup Module
 		}
+}
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	UART_Receive_Done=true;
 }
 void BT_Read_Setup_BKP(void)
 {
@@ -259,9 +262,22 @@ void BT_Write_Setup_BKP(void)
 }
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
-	OLED_Clear();
-	OLED_ShowString(0,1,"Fatal Err:UART_STACK",false);
-	while(1);
+	
+	if(HAL_UART_GetError(&huart1)!=HAL_UART_ERROR_ORE)
+	{
+		OLED_Clear();
+			OLED_ShowString(0,1,"Fatal Err:UART_HW",false);
+	OLED_ShowString(0,2,"Press X Key to reset",false);
+	while(1)
+	{
+		uint8_t key=Get_Key();
+		if(key==Key_X)
+		{
+			NVIC_SystemReset();
+		}
+	}
+	}
+
 }
 void USART1_Init(void)
 {

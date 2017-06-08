@@ -706,7 +706,6 @@ HAL_StatusTypeDef HAL_UART_Transmit(UART_HandleTypeDef *huart, uint8_t *pData, u
 
     /* Process Unlocked */
     __HAL_UNLOCK(huart);
-
     return HAL_OK;
   }
   else

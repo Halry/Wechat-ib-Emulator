@@ -70,7 +70,7 @@ __HAL_RCC_PWR_CLK_ENABLE();
   /* PendSV_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(PendSV_IRQn, 0, 0);
   /* SysTick_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(SysTick_IRQn, 1, 0);
+  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 
     /**NOJTAG: JTAG-DP Disabled and SW-DP Enabled 
     */
