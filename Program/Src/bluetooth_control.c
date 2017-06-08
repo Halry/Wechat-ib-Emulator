@@ -114,6 +114,17 @@ void BT_Init()
 		{
 			Error_Handler();
 		}
+		HAL_UART_Transmit(&huart1,"AT+NAMEMI-BAND",14,0xFF);//Rename
+		HAL_Delay(200);
+			if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
+		{
+					HAL_UART_DeInit(&huart1);//Display error
+		}
+		memset(BT_UART_Receive_Data,'\0',4);
+		if(HAL_UART_Receive_IT(&huart1,BT_UART_Receive_Data,4)==HAL_ERROR)
+		{
+			Error_Handler();
+		}
 		HAL_UART_Transmit(&huart1,"AT+ADVEN0",9,0xFF);//Disable advertising
 		HAL_Delay(200);
 			if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
@@ -146,14 +157,23 @@ void Start_beacon(const char *minor)
 		{
 			Error_Handler();
 		}
-		 __HAL_UART_FLUSH_DRREGISTER(&huart1); 
+		HAL_UART_Transmit(&huart1,"AT+NAMEMI-BAND",14,0xFF);//Rename
+		HAL_Delay(200);
+			if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
+		{
+					HAL_UART_DeInit(&huart1);//Display error
+		}
+		memset(BT_UART_Receive_Data,'\0',4);
+				if(HAL_UART_Receive_IT(&huart1,BT_UART_Receive_Data,4)==HAL_ERROR)
+		{
+			Error_Handler();
+		} 
 			HAL_UART_Transmit(&huart1,"AT+MAJOR2773",12,0xFF);
 			HAL_Delay(300);
 		if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
 		{
 					HAL_UART_DeInit(&huart1);//Display error
 		}
-		 __HAL_UART_FLUSH_DRREGISTER(&huart1); 
 		memset(BT_UART_Receive_Data,'\0',4);
 		memcpy(BT_UART_Transmit_Data,"AT+MINOR",8);
 		memcpy(BT_UART_Transmit_Data+8,minor,4);
@@ -233,7 +253,6 @@ void BT_Power_Control(bool power)
 }
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	UART_Receive_Done=true;
 }
 void BT_Read_Setup_BKP(void)
 {

@@ -87,7 +87,7 @@ void UI_Main(void)
 		{
 			if(select_settings==true)
 			{
-				UI_Settings_Selection();
+				UI_Settings();
 			}
 				else
 				{
@@ -207,39 +207,54 @@ void UI_BT_Adverising(uint8_t select)
 		OLED_ShowChinese(0,1,Left_Not_Enough[0]);
 	}
 }
-void UI_Settings_Selection(void)
+void UI_Settings(void)
 {
 	uint8_t select=0;
 	uint8_t key;
 		UI_Clear_Below_Stat_Bar();
+	bool displayed=false;
 	const uint8_t *Chinese_ptr[3]={Time_Setting_Chinese[0],DFU_Update_Chinese[0],Version_Chinese[0]};
 	while(1)
 	{
-//		key=Get_Key();
-//		if(key==Key_Down&&(select<=2))
-//		{
-//			select++;
-//			OLED_ShowString(0,(select-1)+1,Classroom_String[select-1]);
-//			OLED_R_ShowString(0,select+1,Classroom_String[select]);
-//		}
-//		else if(key==Key_Up&&select>0)
-//		{
-//			select--;
-//			OLED_ShowString(0,(select+1)+1,Classroom_String[select+1]);
-//			OLED_R_ShowString(0,select+1,Classroom_String[select]);
-//		}
-//		else if(key==Key_X)
-//		{
-//			UI_Main();
-//		}
-//		else if(key==Key_OK)
-//		{
-//			UI_BT_Adverising(select);
-//			OLED_R_ShowString(0,1,Classroom_String[0]);
-//	OLED_ShowString(0,2,Classroom_String[1]);
-//	OLED_ShowString(0,3,Classroom_String[2]);
-//		}
+				if(displayed==false)
+		{
+			for(uint8_t i=0;i<=2;i++)
+	{
+		if(i==select)
+		{
+				OLED_R_ShowChinese(0,i+i+1,Chinese_ptr[i]);
+		}
+		else
+		{
+				OLED_ShowChinese(0,i+i+1,Chinese_ptr[i]);
+		}
 	}
+	displayed=true;
+		}
+		key=Get_Key();
+		if(key==Key_Down&&(select<2))
+		{
+			select++;
+displayed=false;
+		}
+		else if(key==Key_Up&&select>0)
+		{
+			select--;
+displayed=false;	
+		}
+		else if(key==Key_X)
+		{
+			UI_Main();
+		}
+		else if(key==Key_OK)
+		{
+			UI_Settings_Selection(select);
+		}
+	}
+}
+void UI_Settings_Selection(uint8_t select)
+{
+	
 }
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
