@@ -399,30 +399,29 @@ void System_Startup_Init(void)
 {
 	HAL_DeInit();
 	 HAL_Init();
-
-
 	 Downclock_to_HSI();
-	//OverClock_to_HSE();
-	/* Initialize all configured peripherals */
   GPIO_Init();
 if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0)==GPIO_PIN_SET)
 {
-	HAL_Delay(2000);
+	uint8_t tick=HAL_GetTick();
+	while(HAL_GetTick()-tick<=1000)
 	{
-		if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0)==GPIO_PIN_SET)
-{
-	//go on
+		if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0)==GPIO_PIN_RESET)
+		{
+			#ifndef Debug_Ver
+			System_low_power(PWR_STDBY);
+			#endif
+		}
+	}
+	
 }
 else
 {
+	#ifndef Debug
 	System_low_power(PWR_STDBY);
+	#endif
 }
-	}
-}else
-{
-	//System_low_power(PWR_STDBY);
-}
- //RTC_Init();
+ RTC_Init();
   SPI2_Init();
 	UI_Print_Bat_Stat(UI_BAT_EMPTY);
   //TIM2_Init();
