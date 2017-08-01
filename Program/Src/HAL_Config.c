@@ -403,8 +403,8 @@ void System_Startup_Init(void)
   GPIO_Init();
 if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0)==GPIO_PIN_SET)
 {
+	#ifndef SYS_DBG
 	HAL_Delay(2000);
-	{
 		if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0)==GPIO_PIN_SET)
 {
 	//go on
@@ -413,10 +413,7 @@ else
 {
 	System_low_power(PWR_STDBY);
 }
-	}
-}else
-{
-	//System_low_power(PWR_STDBY);
+	#endif
 }
  //RTC_Init();
   SPI2_Init();

@@ -6,6 +6,8 @@ extern bool Key_Hold;
 uint8_t display_bat_stat=0;
 extern bool UI_BAT_Charging;
 extern uint16_t BT_Left_ADV_Count;
+extern const char *System_Version;
+extern const char *HW_Ver;
 void UI_Print_Bat_Stat(uint8_t bat_stat)
 {
 const uint8_t* bat_bmp_ptr;
@@ -254,7 +256,38 @@ displayed=false;
 }
 void UI_Settings_Selection(uint8_t select)
 {
-	
+	uint8_t key;
+	UI_Clear_Below_Stat_Bar();
+	switch(select)
+	{
+		case 0://Time setting select
+		{
+			
+		}
+		case 1://DFU
+		{
+			HAL_PWR_EnableBkUpAccess();
+			
+		}
+		case 2://Version
+		{
+			OLED_ShowString(0,1,"SW:",true);
+			OLED_ShowString(24,1,System_Version,true);
+			OLED_ShowString(0,3,"HW:",true);
+			OLED_ShowString(24,3,HW_Ver,true);
+			while(1)
+			{
+				key=Get_Key();
+				if(key==Key_X)
+				{
+					UI_Settings();
+				}
+			}
+		}
+		default:
+		{
+		}
+	}
 }
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {

@@ -10,7 +10,7 @@
 //ADC Function Flag
 #define ADC_Sample_Busy 1
 #define ADC_Sample_Start 0
-#define ADC_Sample_Tick_Start 200
+#define ADC_Sample_Tick_Start 2000
 //Voltage define
 #define ADC_BAT_HALF 2.375
 #define ADC_BAT_EMPTY 2

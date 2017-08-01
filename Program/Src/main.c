@@ -1,6 +1,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#define SYS_DBG
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -17,7 +17,8 @@ uint8_t Signin_Count;
 extern TIM_HandleTypeDef htim4;
                                 
                                 
-
+const char *System_Version="0.21b";
+const char *HW_Ver="1";
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 
