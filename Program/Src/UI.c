@@ -8,6 +8,7 @@ extern bool UI_BAT_Charging;
 extern uint16_t BT_Left_ADV_Count;
 extern const char *System_Version;
 extern const char *HW_Ver;
+extern RTC_HandleTypeDef hrtc;
 void UI_Print_Bat_Stat(uint8_t bat_stat)
 {
 const uint8_t* bat_bmp_ptr;
@@ -267,7 +268,12 @@ void UI_Settings_Selection(uint8_t select)
 		case 1://DFU
 		{
 			HAL_PWR_EnableBkUpAccess();
-			
+			uint16_t DR0_BK=0;
+			DR0_BK=HAL_RTCEx_BKUPRead(&hrtc,RTC_BKP_DR1);
+			DR0_BK=DR0_BK|1;
+			HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR1,DR0_BK);
+			HAL_PWR_DisableBkUpAccess();
+			NVIC_SystemReset();
 		}
 		case 2://Version
 		{
