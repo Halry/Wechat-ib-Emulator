@@ -1,5 +1,7 @@
 #include "OLED.h"
-unsigned char F6x8[][6] =		
+bool OLED_SPI_DMA_Busy=false;
+extern DMA_HandleTypeDef hdma_spi2_tx;
+const uint8_t F6x8[][6]=		
 {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,// sp
 0x00, 0x00, 0x00, 0x2f, 0x00, 0x00,// !
@@ -94,7 +96,7 @@ unsigned char F6x8[][6] =
 0x00, 0x44, 0x64, 0x54, 0x4C, 0x44,// z
 0x14, 0x14, 0x14, 0x14, 0x14, 0x14,// horiz lines
 };
-const unsigned char F8X16[]=	  
+const uint8_t F8X16[]=	  
 {
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,// 0
   0x00,0x00,0x00,0xF8,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x33,0x30,0x00,0x00,0x00,//! 1
@@ -192,10 +194,7 @@ const unsigned char F8X16[]=
   0x00,0x02,0x02,0x7C,0x80,0x00,0x00,0x00,0x00,0x40,0x40,0x3F,0x00,0x00,0x00,0x00,//} 93
   0x00,0x06,0x01,0x01,0x02,0x02,0x04,0x04,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,//~ 94
 };
-
 extern SPI_HandleTypeDef hspi2;
-
-	
 void OLED_DrawBMP(uint8_t x0, uint8_t y0,uint8_t x1, uint8_t y1,const uint8_t* BMP)
 { 	
  unsigned int j=0;
@@ -214,44 +213,52 @@ void OLED_DrawBMP(uint8_t x0, uint8_t y0,uint8_t x1, uint8_t y1,const uint8_t* B
 } 
 void OLED_WR_Byte(uint8_t data,bool cmd_flag)
 {
-	
+	while(OLED_SPI_DMA_Busy==true);
+	OLED_SPI_DMA_Busy=true;
 	if(cmd_flag)
 		OLED_DC_SET();
 	else
 		OLED_DC_CLR();
-	HAL_SPI_Transmit(&hspi2,&data,1,0xFF);
+	HAL_SPI_Transmit_DMA(&hspi2,&data,1);
 	OLED_DC_SET(); 
 }
 void OLED_WR_R_Byte(uint8_t data,bool cmd_flag)
 {
+	while(OLED_SPI_DMA_Busy==true);
+	OLED_SPI_DMA_Busy=true;
 	uint8_t i;
 	i=~data;
 	if(cmd_flag)
 		OLED_DC_SET();
 	else
 		OLED_DC_CLR();
-	HAL_SPI_Transmit(&hspi2,&i,1,0xFF);
+	HAL_SPI_Transmit_DMA(&hspi2,&i,1);
 	OLED_DC_SET(); 
+}
+void OLED_WR_Data(uint8_t *data,uint16_t size)
+{
+	while(OLED_SPI_DMA_Busy==true);
+	OLED_DC_CLR();
+	HAL_SPI_Transmit_DMA(&hspi2,data,size);
+	OLED_SPI_DMA_Busy=true;
+	OLED_DC_SET();
 }
 void OLED_ShowChar(uint8_t x,uint8_t y,uint8_t chr,bool Large_Font)
 {      	
-	unsigned char c=0,i=0;	
+	unsigned char c=0;	
 		c=chr-' ';//???????			
 		if(x>Max_Column-1){x=0;y=y+2;}
 		if(Large_Font==true)
 			{
 			OLED_Set_Pos(x,y);	
-			for(i=0;i<8;i++)
-			OLED_WR_Byte(F8X16[c*16+i],OLED_DATA_FLAG);
+			OLED_WR_Data((uint8_t *)&F8X16[c*16],8);
 			OLED_Set_Pos(x,y+1);
-			for(i=0;i<8;i++)
-			OLED_WR_Byte(F8X16[c*16+i+8],OLED_DATA_FLAG);
+			OLED_WR_Data((uint8_t *)&F8X16[c*16+8],8);
 			}
 			else
 			{
 				OLED_Set_Pos(x,y);
-				for(i=0;i<6;i++)
-				OLED_WR_Byte(F6x8[c][i],OLED_DATA_FLAG);
+				OLED_WR_Data((uint8_t *)&F6x8[c][0],6);
 			}
 			
 }
@@ -316,17 +323,11 @@ void OLED_ShowChinese(uint8_t x,uint8_t y,const uint8_t *chinese)
 	for(uint8_t c=0;c<=chinese[0];c++)
 	{
 		OLED_Set_Pos(x+(c*16),y);
-    for(uint8_t t=0;t<16;t++)
-		{
-				OLED_WR_Byte(*(chinese+addr),OLED_DATA_FLAG);
-				addr+=1;
-     }	
+		OLED_WR_Data((uint8_t *)(chinese+addr),16);
+		addr+=16;
 		OLED_Set_Pos(x+(c*16),y+1);	
-    for(uint8_t t=0;t<16;t++)
-			{	
-				OLED_WR_Byte(*(chinese+addr),OLED_DATA_FLAG);
-				addr+=1;
-      }				
+    OLED_WR_Data((uint8_t *)(chinese+addr),16);	
+		addr+=16;
 		}			
 }
 void OLED_R_ShowChinese(uint8_t x,uint8_t y,const uint8_t *chinese)
@@ -352,6 +353,7 @@ void OLED_R_ShowChinese(uint8_t x,uint8_t y,const uint8_t *chinese)
 void OLED_Init(void)
 {
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);
+	OLED_SPI_Ctrl(true);
 	OLED_RST_SET();
 	HAL_Delay(100);
 	OLED_RST_CLR();
@@ -387,7 +389,6 @@ void OLED_Init(void)
 	OLED_WR_Byte(0xA6,OLED_CMD_FLAG);// Disable Inverse Display On (0xa6/a7) 
 	OLED_WR_Byte(0xAF,OLED_CMD_FLAG);//--turn on oled panel
 	OLED_WR_Byte(0xAF,OLED_CMD_FLAG); /*display ON*/ 
-	
 	OLED_Clear();
 	OLED_Set_Pos(0,0); 	
 }
@@ -411,4 +412,42 @@ void OLED_Clear(void)
 void OLED_PowerOff()
 {
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
+	OLED_SPI_Ctrl(false);
+}
+void OLED_SPI_Ctrl(bool enabled)
+{
+	if(enabled==true)
+	{
+  hspi2.Instance = SPI2;
+  hspi2.Init.Mode = SPI_MODE_MASTER;
+  hspi2.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi2.Init.NSS = SPI_NSS_HARD_OUTPUT;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
+  hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi2.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi2) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+}
+	else
+	{
+	if (HAL_SPI_DeInit(&hspi2) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+	}
+}
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+	if(hspi->Instance==SPI2)
+	{
+		OLED_SPI_DMA_Busy=false;
+		OLED_DC_SET();
+	}
 }

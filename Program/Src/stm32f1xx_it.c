@@ -44,6 +44,11 @@ extern RTC_HandleTypeDef hrtc;
 extern ADC_HandleTypeDef hadc1;
 extern UART_HandleTypeDef huart1;
 extern TIM_HandleTypeDef htim4;
+extern SPI_HandleTypeDef hspi2;
+
+extern DMA_HandleTypeDef hdma_adc1;
+extern DMA_HandleTypeDef hdma_spi2_tx;
+extern DMA_HandleTypeDef hdma_usart1_tx;
 /******************************************************************************/
 /*            Cortex-M3 Processor Interruption and Exception Handlers         */ 
 /******************************************************************************/
@@ -245,6 +250,18 @@ void RTC_IRQHandler(void)
 }
 void PVD_IRQHandler(void)//Display BAT low and put system to standby mode.
 {
+}
+void DMA1_Channel1_IRQHandler(void)
+{
+	HAL_DMA_IRQHandler(&hdma_adc1);
+}
+void DMA1_Channel4_IRQHandler(void)
+{
+  HAL_DMA_IRQHandler(&hdma_usart1_tx);
+}
+void DMA1_Channel5_IRQHandler(void)
+{
+  HAL_DMA_IRQHandler(&hdma_spi2_tx);
 }
 /* USER CODE BEGIN 1 */
 

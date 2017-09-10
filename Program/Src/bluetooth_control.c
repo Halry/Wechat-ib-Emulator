@@ -300,7 +300,7 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 }
 void USART1_Init(void)
 {
-	OverClock_to_HSE();
+	System_Clock_Ctrl(HS_CLK);
   huart1.Instance = USART1;
   huart1.Init.BaudRate = 115200;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
@@ -314,12 +314,13 @@ void USART1_Init(void)
     _Error_Handler(__FILE__, __LINE__);
   }
 	HAL_NVIC_SetPriority(USART1_IRQn,0,0);
-HAL_NVIC_EnableIRQ(USART1_IRQn);
-	
+HAL_NVIC_EnableIRQ(USART1_IRQn);	
 }
+
 void USART1_DeInit(void)
 {
+	System_Clock_Ctrl(LS_CLK);
 	HAL_NVIC_DisableIRQ(USART1_IRQn);
 	HAL_UART_DeInit(&huart1);
-	Downclock_to_HSI();
+
 }
