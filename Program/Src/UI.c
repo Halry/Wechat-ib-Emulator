@@ -65,12 +65,12 @@ void UI_Main(void)
 	UI_Clear_Below_Stat_Bar();
 	bool select_settings=false;
 	bool displayed=false;
-		const uint8_t *Chinese_ptr[2]={Signin_Chinese[0],Setting_Chinese[0]};
-
+	const uint8_t *Chinese_ptr[2]={Signin_Chinese[0],Setting_Chinese[0]};
+	UI_Update_Left_Count();
 	OLED_R_ShowChinese(0,1,Chinese_ptr[0]);
 	OLED_ShowChinese(0,3,Chinese_ptr[1]);
 	//Display Left Count
-	UI_Update_Left_Count();
+
 	while(1)
 	{
 		key=Get_Key();

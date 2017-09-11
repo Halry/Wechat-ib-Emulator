@@ -229,7 +229,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
 
     __HAL_LINKDMA(hspi,hdmatx,hdma_spi2_tx);
 		  /* DMA1 SPI2_TX interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 1, 0);
+  HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
   /* USER CODE BEGIN SPI2_MspInit 1 */
 

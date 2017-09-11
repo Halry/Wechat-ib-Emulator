@@ -1,6 +1,7 @@
 #include "OLED.h"
 bool OLED_SPI_DMA_Busy=false;
 extern DMA_HandleTypeDef hdma_spi2_tx;
+uint8_t *Reverse_temp=NULL;
 const uint8_t F6x8[][6]=		
 {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,// sp
@@ -243,6 +244,19 @@ void OLED_WR_Data(uint8_t *data,uint16_t size)
 	OLED_SPI_DMA_Busy=true;
 	OLED_DC_SET();
 }
+void OLED_WR_R_Data(uint8_t *data,uint16_t size)
+{
+	while(OLED_SPI_DMA_Busy==true);
+	Reverse_temp=malloc(size);
+	for(uint16_t c=0;c<size;c++)
+	{
+		*(Reverse_temp+c)=~(*(data+c));
+	}
+	OLED_DC_CLR();
+	HAL_SPI_Transmit_DMA(&hspi2,Reverse_temp,size);
+	OLED_SPI_DMA_Busy=true;
+	OLED_DC_SET();
+}
 void OLED_ShowChar(uint8_t x,uint8_t y,uint8_t chr,bool Large_Font)
 {      	
 	unsigned char c=0;	
@@ -336,17 +350,11 @@ void OLED_R_ShowChinese(uint8_t x,uint8_t y,const uint8_t *chinese)
 		for(uint8_t c=0;c<=chinese[0];c++)
 	{
 		OLED_Set_Pos(x+(c*16),y);
-    for(uint8_t t=0;t<16;t++)
-		{
-				OLED_WR_R_Byte(*(chinese+addr),OLED_DATA_FLAG);
-				addr+=1;
-     }	
-		OLED_Set_Pos(x+(c*16),y+1);		
-    for(uint8_t t=0;t<16;t++)
-			{	
-				OLED_WR_R_Byte(*(chinese+addr),OLED_DATA_FLAG);
-				addr+=1;
-      }		
+		OLED_WR_R_Data((uint8_t *)(chinese+addr),16);
+		addr+=16;
+		OLED_Set_Pos(x+(c*16),y+1);	
+    OLED_WR_R_Data((uint8_t *)(chinese+addr),16);	
+		addr+=16;
 		}			
 }
 
@@ -420,12 +428,12 @@ void OLED_SPI_Ctrl(bool enabled)
 	{
   hspi2.Instance = SPI2;
   hspi2.Init.Mode = SPI_MODE_MASTER;
-  hspi2.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi2.Init.Direction = SPI_DIRECTION_1LINE;
   hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi2.Init.NSS = SPI_NSS_HARD_OUTPUT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -449,5 +457,9 @@ void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
 	{
 		OLED_SPI_DMA_Busy=false;
 		OLED_DC_SET();
+		if(Reverse_temp!=NULL)
+		{
+			free(Reverse_temp);
+		}
 	}
 }

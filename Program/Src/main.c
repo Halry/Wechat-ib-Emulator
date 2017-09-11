@@ -1,6 +1,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#define SYS_DBG
+
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -51,6 +51,5 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if(htim->Instance==TIM4)//every 10ms action
 	{	
 		Key_Scan();
-		ADC_Action(false);
 	}
 }

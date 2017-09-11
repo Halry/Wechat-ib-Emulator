@@ -1,14 +1,13 @@
 #include "bluetooth_control.h"
 extern UART_HandleTypeDef huart1;
 extern RTC_HandleTypeDef hrtc;
-uint8_t const BT_Classroom_Minor[3][4]={{"55AB"},{"55A6"},{"55D7"}};
+uint8_t const BT_Classroom_Minor[3][4]={{"559D"},{"55A0"},{"55D7"}};
 uint8_t *BT_UART_Transmit_Data=NULL;
 uint8_t *BT_UART_Receive_Data=NULL;
 char *BT_Last_Minor=NULL;
 uint16_t BT_Left_ADV_Count=50;
 void BT_Init()
 {
-	HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR8,BT_Left_ADV_Count);
 	uint8_t null_minor[4];
 	memset(null_minor,'\0',4);
 	BT_Read_Setup_BKP();
@@ -269,6 +268,9 @@ void BT_Read_Setup_BKP(void)
 		*(BT_Last_Minor+2)=(BT_Minor_BKP>>8);
 		*(BT_Last_Minor+3)=BT_Minor_BKP;
 		BT_Left_ADV_Count=HAL_RTCEx_BKUPRead(&hrtc,RTC_BKP_DR8);
+		#ifdef SYS_DBG
+		BT_Left_ADV_Count=999;
+		#endif
 		HAL_PWR_DisableBkUpAccess();
 }
 void BT_Write_Setup_BKP(void)
