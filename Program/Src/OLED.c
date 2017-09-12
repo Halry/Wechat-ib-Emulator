@@ -2,6 +2,7 @@
 bool OLED_SPI_DMA_Busy=false;
 extern DMA_HandleTypeDef hdma_spi2_tx;
 uint8_t *Reverse_temp=NULL;
+uint32_t OLED_SPI_Tick=0;
 const uint8_t F6x8[][6]=		
 {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,// sp
@@ -214,18 +215,31 @@ void OLED_DrawBMP(uint8_t x0, uint8_t y0,uint8_t x1, uint8_t y1,const uint8_t* B
 } 
 void OLED_WR_Byte(uint8_t data,bool cmd_flag)
 {
-	while(OLED_SPI_DMA_Busy==true);
+	while(OLED_SPI_DMA_Busy==true)
+	{
+		if(HAL_GetTick()-OLED_SPI_Tick>=1000)
+		{
+			OLED_SPI_DMA_Busy=false;
+		}
+	}
 	OLED_SPI_DMA_Busy=true;
 	if(cmd_flag)
 		OLED_DC_SET();
 	else
 		OLED_DC_CLR();
 	HAL_SPI_Transmit_DMA(&hspi2,&data,1);
+	OLED_SPI_Tick=HAL_GetTick();
 	OLED_DC_SET(); 
 }
 void OLED_WR_R_Byte(uint8_t data,bool cmd_flag)
 {
-	while(OLED_SPI_DMA_Busy==true);
+	while(OLED_SPI_DMA_Busy==true)
+	{
+		if(HAL_GetTick()-OLED_SPI_Tick>=1000)
+		{
+			OLED_SPI_DMA_Busy=false;
+		}
+	}
 	OLED_SPI_DMA_Busy=true;
 	uint8_t i;
 	i=~data;
@@ -234,19 +248,33 @@ void OLED_WR_R_Byte(uint8_t data,bool cmd_flag)
 	else
 		OLED_DC_CLR();
 	HAL_SPI_Transmit_DMA(&hspi2,&i,1);
+	OLED_SPI_Tick=HAL_GetTick();
 	OLED_DC_SET(); 
 }
 void OLED_WR_Data(uint8_t *data,uint16_t size)
 {
-	while(OLED_SPI_DMA_Busy==true);
+	while(OLED_SPI_DMA_Busy==true)
+	{
+		if(HAL_GetTick()-OLED_SPI_Tick>=1000)
+		{
+			OLED_SPI_DMA_Busy=false;
+		}
+	}
 	OLED_DC_CLR();
 	HAL_SPI_Transmit_DMA(&hspi2,data,size);
 	OLED_SPI_DMA_Busy=true;
+	OLED_SPI_Tick=HAL_GetTick();
 	OLED_DC_SET();
 }
 void OLED_WR_R_Data(uint8_t *data,uint16_t size)
 {
-	while(OLED_SPI_DMA_Busy==true);
+	while(OLED_SPI_DMA_Busy==true)
+	{
+		if(HAL_GetTick()-OLED_SPI_Tick>=1000)
+		{
+			OLED_SPI_DMA_Busy=false;
+		}
+	}
 	Reverse_temp=malloc(size);
 	for(uint16_t c=0;c<size;c++)
 	{
@@ -255,6 +283,7 @@ void OLED_WR_R_Data(uint8_t *data,uint16_t size)
 	OLED_DC_CLR();
 	HAL_SPI_Transmit_DMA(&hspi2,Reverse_temp,size);
 	OLED_SPI_DMA_Busy=true;
+	OLED_SPI_Tick=HAL_GetTick();
 	OLED_DC_SET();
 }
 void OLED_ShowChar(uint8_t x,uint8_t y,uint8_t chr,bool Large_Font)
