@@ -11,4 +11,5 @@ void USART1_DeInit(void);
 void BT_Power_Control(bool power);
 void BT_Read_Setup_BKP(void);
 void BT_Write_Setup_BKP(void);
+void BT_UART_Handler(uint8_t *data,uint16_t size);
 #endif

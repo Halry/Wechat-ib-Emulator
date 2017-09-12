@@ -5,7 +5,12 @@ uint8_t const BT_Classroom_Minor[3][4]={{"559D"},{"55A0"},{"55D7"}};
 uint8_t *BT_UART_Transmit_Data=NULL;
 uint8_t *BT_UART_Receive_Data=NULL;
 char *BT_Last_Minor=NULL;
-uint16_t BT_Left_ADV_Count=50;
+uint16_t BT_Left_ADV_Count=0;
+uint32_t BT_UART_RX_Tick=0;
+uint8_t BT_Last_Receive=0;
+uint8_t BT_Receive_Addr=0;
+bool BT_UART_DMA_Busy=false;
+bool BT_UART_RX_Busy=false;
 void BT_Init()
 {
 	uint8_t null_minor[4];
@@ -16,25 +21,7 @@ void BT_Init()
 	{
 		BT_Power_Control(true);
 		USART1_Init();
-		if((BT_UART_Receive_Data=malloc(4))==NULL)
-		{
-			Error_Handler();
-		}
-		if(HAL_UART_Receive_IT(&huart1,BT_UART_Receive_Data,4)==HAL_ERROR)
-		{
-			Error_Handler();
-		}
-		HAL_UART_Transmit(&huart1,"AT+HOSTEN3",10,0xFF);
-		HAL_Delay(200);
-		if(strcmp((const char*)BT_UART_Receive_Data,"+ERR")==0)
-		{
-					HAL_UART_DeInit(&huart1);//Display error
-		}
-		memset(BT_UART_Receive_Data,'\1',4);
-		if(HAL_UART_Receive_IT(&huart1,BT_UART_Receive_Data,4)==HAL_ERROR)
-		{
-			Error_Handler();
-		}
+		BT_UART_Handler("AT+HOSTEN3",10);
 		memset(BT_UART_Receive_Data,'\0',4);
 		HAL_UART_Transmit(&huart1,"AT+POWR3",8,0xFF);
 		HAL_Delay(200);
@@ -137,6 +124,40 @@ void BT_Init()
 		USART1_DeInit();
 	}
 } 
+void BT_UART_Handler(uint8_t *data,uint16_t size)
+{
+	uint32_t ticks=HAL_GetTick();
+	while(BT_UART_DMA_Busy==true)
+	{
+		if(HAL_GetTick()-ticks>=1000)
+		{
+			BT_UART_DMA_Busy=false;
+			//Reset UART and BT Module
+		}
+	}
+	while(HAL_GetTick()-BT_UART_RX_Tick>=1000)
+	{
+		BT_UART_RX_Busy=false;
+		BT_UART_RX_Tick=0;
+		BT_Receive_Addr=0;
+	}
+	if(BT_UART_Receive_Data!=NULL)
+	{
+		free(BT_UART_Receive_Data);
+		BT_Receive_Addr=0;
+	}
+	BT_UART_Receive_Data=malloc(5);
+	if(HAL_UART_Receive_IT(&huart1,BT_UART_Receive_Data,1)==HAL_ERROR)
+		{
+			Error_Handler();
+		}
+		BT_UART_RX_Tick=HAL_GetTick();
+	BT_UART_DMA_Busy=true;
+	if(HAL_UART_Transmit_DMA(&huart1,data,size)==HAL_ERROR)
+	{
+		Error_Handler();
+	}	
+}
 void Start_beacon(const char *minor)
 {
 	BT_Power_Control(true);
@@ -250,8 +271,40 @@ void BT_Power_Control(bool power)
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_6,GPIO_PIN_RESET);//Wakeup Module
 		}
 }
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+	BT_UART_DMA_Busy=false;
+}
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
+	if(BT_UART_Receive_Data==NULL)
+	{
+		//go to error
+	}
+	else
+	{
+		*(BT_UART_Receive_Data+BT_Receive_Addr)=BT_Last_Receive;
+		BT_Receive_Addr++;	
+		if(BT_Receive_Addr>=4)
+		{
+			if(memcmp(BT_UART_Receive_Data,"+ERR",4)==0)
+		{
+					HAL_UART_DeInit(&huart1);//Display error
+		}
+		}
+		else if(memcmp(BT_UART_Receive_Data,"+OK",3)==0)
+		{
+			BT_UART_RX_Busy=false;
+			free(BT_UART_Receive_Data);
+		}
+		else
+		{
+			if(HAL_UART_Receive_IT(&huart1,&BT_Last_Receive,1)==HAL_ERROR)
+		{
+			Error_Handler();
+		}
+		}
+	}
 }
 void BT_Read_Setup_BKP(void)
 {
@@ -298,8 +351,8 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 		}
 	}
 	}
-
 }
+
 void USART1_Init(void)
 {
 	System_Clock_Ctrl(HS_CLK);
@@ -317,12 +370,16 @@ void USART1_Init(void)
   }
 	HAL_NVIC_SetPriority(USART1_IRQn,0,0);
 HAL_NVIC_EnableIRQ(USART1_IRQn);	
+	//Enable DMA Interruot
+	  HAL_NVIC_SetPriority(DMA1_Channel4_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel4_IRQn);
 }
 
 void USART1_DeInit(void)
 {
 	System_Clock_Ctrl(LS_CLK);
 	HAL_NVIC_DisableIRQ(USART1_IRQn);
+	HAL_NVIC_DisableIRQ(DMA1_Channel4_IRQn);
 	HAL_UART_DeInit(&huart1);
 
 }
