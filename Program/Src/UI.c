@@ -109,7 +109,7 @@ void UI_Power_Off(void)
 	uint8_t key;
 	UI_Clear_Below_Stat_Bar();
 			OLED_ShowChinese(0,1,Sure_Power_Off[0]);
-			OLED_ShowString(64,1,"?",true);
+			OLED_ShowString(64,1,(uint8_t *)"?",true);
 	uint16_t ticks=HAL_GetTick();
 	bool key_released=false;
 		while(1)
@@ -193,7 +193,7 @@ void UI_BT_Adverising(uint8_t select)
 	{
 	OLED_ShowString(0,1,Classroom_String[select],true);
 		OLED_ShowChinese(40,1,Started_Chinese[0]);
-	Start_beacon(BT_Classroom_Minor[select]);
+	Start_beacon((uint8_t*)BT_Classroom_Minor[select]);
 	while(1)
 	{
 		uint8_t key=Get_Key();

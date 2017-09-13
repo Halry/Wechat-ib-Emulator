@@ -49,7 +49,7 @@ void BT_UART_Handler(uint8_t *data,uint16_t size)
 	}	
 	HAL_Delay(500);
 }
-void Start_beacon(const char *minor)
+void Start_beacon(uint8_t *minor)
 {
 	BT_Power_Control(true);
 	USART1_Init();
@@ -73,6 +73,7 @@ void Stop_beacon(void)
 {
 		USART1_Init();
 		BT_UART_Handler((uint8_t *)"AT+ADVEN0",9);//Disable Advertising
+		BT_UART_Handler((uint8_t *)"AT+MINOR0000",12);//Reset the minor to 0x0000
 		USART1_DeInit();
 		BT_Power_Control(false);
 }
@@ -88,8 +89,8 @@ void BT_Power_Control(bool power)
 		{
 			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_0,GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,GPIO_PIN_RESET);
-	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_7,GPIO_PIN_RESET);//Set Connection Ctr pin to high
-	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_6,GPIO_PIN_RESET);//Wakeup Module
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_7,GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_6,GPIO_PIN_RESET);
 		}
 }
 void BT_Read_Setup_BKP(void)
