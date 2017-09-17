@@ -18,4 +18,5 @@ void UI_BT_Adverising(uint8_t select);
 void UI_Update_Left_Count(void);
 void UI_Power_Off(void);
 void UI_Settings_Selection(uint8_t select);
+void UI_Show_Please_Wait(void);
 #endif

@@ -483,12 +483,10 @@ void OLED_SPI_Ctrl(bool enabled)
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
 {
 	if(hspi->Instance==SPI2)
-	{
 		OLED_SPI_DMA_Busy=false;
 		OLED_DC_SET();
 		if(Reverse_temp!=NULL)
 		{
 			free(Reverse_temp);
 		}
-	}
 }

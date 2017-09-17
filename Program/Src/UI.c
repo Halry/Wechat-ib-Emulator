@@ -191,9 +191,9 @@ void UI_BT_Adverising(uint8_t select)
 	UI_Clear_Below_Stat_Bar();
 	if(BT_Left_ADV_Count>0)
 	{
-	OLED_ShowString(0,1,Classroom_String[select],true);
-		OLED_ShowChinese(40,1,Started_Chinese[0]);
 	Start_beacon((uint8_t*)BT_Classroom_Minor[select]);
+		OLED_ShowString(0,1,Classroom_String[select],true);
+		OLED_ShowChinese(40,1,Started_Chinese[0]);
 	while(1)
 	{
 		uint8_t key=Get_Key();
@@ -294,6 +294,11 @@ void UI_Settings_Selection(uint8_t select)
 		{
 		}
 	}
+}
+void UI_Show_Please_Wait(void)
+{
+	UI_Clear_Below_Stat_Bar();
+		OLED_ShowChinese(24,1,(uint8_t *)Please_Wait_Chinese);
 }
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {

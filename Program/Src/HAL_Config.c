@@ -9,7 +9,6 @@ UART_HandleTypeDef huart1;
 //DMA
 DMA_HandleTypeDef hdma_adc1;
 DMA_HandleTypeDef hdma_spi2_tx;
-DMA_HandleTypeDef hdma_usart1_tx;
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 bool Sys_In_HS_CLK=false;
 void System_Clock_Ctrl(uint8_t Clock_Sel)
@@ -377,8 +376,10 @@ else
 }
 	#endif
 }
+DMA_Init();
  //RTC_Init();
 	OLED_Init();
+	UI_Show_Please_Wait();
 	TIM4_Start();
 	BT_Init();
 }

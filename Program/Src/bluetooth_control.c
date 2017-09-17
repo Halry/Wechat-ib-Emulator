@@ -49,8 +49,9 @@ void BT_UART_Handler(uint8_t *data,uint16_t size)
 	}	
 	HAL_Delay(500);
 }
-void Start_beacon(uint8_t *minor)
+bool Start_beacon(uint8_t *minor)
 {
+	UI_Show_Please_Wait();
 	BT_Power_Control(true);
 	USART1_Init();
 	if((BT_UART_Transmit_Data=malloc(12))==NULL)
@@ -68,14 +69,17 @@ void Start_beacon(uint8_t *minor)
 		BT_Last_Minor=(char *)minor;
 		BT_Write_Setup_BKP();
 		USART1_DeInit();
+		return true;
 }
-void Stop_beacon(void)
+bool Stop_beacon(void)
 {
+	UI_Show_Please_Wait();
 		USART1_Init();
 		BT_UART_Handler((uint8_t *)"AT+ADVEN0",9);//Disable Advertising
 		BT_UART_Handler((uint8_t *)"AT+MINOR0000",12);//Reset the minor to 0x0000
 		USART1_DeInit();
 		BT_Power_Control(false);
+	return true;
 }
 void BT_Power_Control(bool power)
 {
