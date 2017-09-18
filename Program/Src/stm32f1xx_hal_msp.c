@@ -116,7 +116,8 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
     {
       _Error_Handler(__FILE__, __LINE__);
     }
-
+ HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
     __HAL_LINKDMA(hadc,DMA_Handle,hdma_adc1);
   /* USER CODE BEGIN ADC1_MspInit 1 */
 
@@ -140,6 +141,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
     PA4     ------> ADC1_IN4 
     */
     HAL_GPIO_DeInit(GPIOA, GPIO_PIN_4);
+		HAL_NVIC_DisableIRQ(DMA1_Channel1_IRQn);
 		//DMA
 		HAL_DMA_DeInit(hadc->DMA_Handle);
   /* USER CODE BEGIN ADC1_MspDeInit 1 */

@@ -9,6 +9,8 @@ UART_HandleTypeDef huart1;
 //DMA
 DMA_HandleTypeDef hdma_adc1;
 DMA_HandleTypeDef hdma_spi2_tx;
+extern const char *System_Version;
+extern const char *HW_Ver;
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 bool Sys_In_HS_CLK=false;
 void System_Clock_Ctrl(uint8_t Clock_Sel)
@@ -94,6 +96,7 @@ if(__HAL_RCC_GET_FLAG(RCC_FLAG_LSERDY)==false)
 	HAL_RCC_GetPCLK1Freq();
   HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+	__HAL_RCC_DMA1_CLK_ENABLE();
 }
 /* ADC1 function */
 void ADC1_Init(void)
@@ -142,19 +145,6 @@ void RTC_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-
-}
-//DMA Init
-void DMA_Init(void) 
-{
-  /* DMA controller clock enable */
-  __HAL_RCC_DMA1_CLK_ENABLE();
-  /* DMA1 ADC interrupt configuration */
-  //HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
-  //HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
-  /* DMA1 USART1_RX IRQn interrupt configuration */
-
-
 
 }
 /* TIM2 init function */
@@ -376,10 +366,13 @@ else
 }
 	#endif
 }
-DMA_Init();
  //RTC_Init();
 	OLED_Init();
 	UI_Show_Please_Wait();
+	OLED_ShowString(0,3,(uint8_t*)"SW:",true);
+	OLED_ShowString(24,3,(uint8_t*)System_Version,true);
+	OLED_ShowString(0,5,(uint8_t*)"HW:",true);
+	OLED_ShowString(24,5,(uint8_t*)HW_Ver,true);
 	TIM4_Start();
 	BT_Init();
 }

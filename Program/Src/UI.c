@@ -49,15 +49,9 @@ void UI_Clear_Below_Stat_Bar(void)
 }
 void UI_Update_Left_Count(void)
 {
-	uint8_t *bt_left_adv_count_disp=malloc(4);
-	uint8_t bt_left_adv_count_high=((BT_Left_ADV_Count/100)%10)+'0';
-	memcpy(bt_left_adv_count_disp,&bt_left_adv_count_high,1);
-	uint8_t bt_left_adv_count_mid=((BT_Left_ADV_Count/10)%10)+'0';
-	memcpy(bt_left_adv_count_disp+1,&bt_left_adv_count_mid,1);
-	uint8_t bt_left_adv_count_low=((BT_Left_ADV_Count)%10)+'0';
-	memcpy(bt_left_adv_count_disp+2,&bt_left_adv_count_low,1);
-	OLED_ShowString(0,0,bt_left_adv_count_disp,false);
-  free(bt_left_adv_count_disp);
+	OLED_ShowChar(0,0,((BT_Left_ADV_Count/100)%10)+'0',false);
+	OLED_ShowChar(6,0,((BT_Left_ADV_Count/10)%10)+'0',false);
+	OLED_ShowChar(12,0,(BT_Left_ADV_Count%10)+'0',false);
 }
 void UI_Main(void)
 {
@@ -194,12 +188,28 @@ void UI_BT_Adverising(uint8_t select)
 	Start_beacon((uint8_t*)BT_Classroom_Minor[select]);
 		OLED_ShowString(0,1,Classroom_String[select],true);
 		OLED_ShowChinese(40,1,Started_Chinese[0]);
+		uint8_t Left_Tick=60;
+		OLED_ShowChar(0,3,(Left_Tick/10)%10+'0',true);
+		OLED_ShowChar(8,3,(Left_Tick%10)+'0',true);
+		uint32_t Start_Ticks=HAL_GetTick();
+		uint32_t left_count_tick=Start_Ticks;
 	while(1)
 	{
+		if(HAL_GetTick()-left_count_tick>=1000)
+		{
+			Left_Tick--;
+			OLED_ShowChar(0,3,(Left_Tick/10)%10+'0',true);
+			OLED_ShowChar(8,3,(Left_Tick%10)+'0',true);
+			left_count_tick=HAL_GetTick();
+		}
 		uint8_t key=Get_Key();
 		if(key==Key_X)
 		{
-			
+			Stop_beacon();
+			UI_Main();
+		}
+		if(HAL_GetTick()-Start_Ticks>=60500)
+		{
 			Stop_beacon();
 			UI_Main();
 		}
@@ -277,10 +287,10 @@ void UI_Settings_Selection(uint8_t select)
 		}
 		case 2://Version
 		{
-			OLED_ShowString(0,1,"SW:",true);
-			OLED_ShowString(24,1,System_Version,true);
-			OLED_ShowString(0,3,"HW:",true);
-			OLED_ShowString(24,3,HW_Ver,true);
+			OLED_ShowString(0,1,(uint8_t*)"SW:",true);
+			OLED_ShowString(24,1,(uint8_t*)System_Version,true);
+			OLED_ShowString(0,3,(uint8_t*)"HW:",true);
+			OLED_ShowString(24,3,(uint8_t*)HW_Ver,true);
 			while(1)
 			{
 				key=Get_Key();
@@ -298,7 +308,7 @@ void UI_Settings_Selection(uint8_t select)
 void UI_Show_Please_Wait(void)
 {
 	UI_Clear_Below_Stat_Bar();
-		OLED_ShowChinese(24,1,(uint8_t *)Please_Wait_Chinese);
+	OLED_ShowChinese(40,1,(uint8_t *)Please_Wait_Chinese);
 }
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
