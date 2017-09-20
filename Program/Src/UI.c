@@ -312,34 +312,34 @@ void UI_Show_Please_Wait(void)
 }
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	uint8_t pin_state=0;
-	switch(GPIO_Pin){
-		case GPIO_PIN_2://TP_CHRG Detect:
-			{
-				pin_state=HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_2);
-				if(pin_state==GPIO_PIN_SET)
-				{
-					
-				}
-				else if(pin_state==GPIO_PIN_RESET)
-				{
-					UI_Print_Bat_Stat(UI_BAT_CHRG);
-				}
-				break;
-		}
-		case GPIO_PIN_4:
-		{
-			pin_state=HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_4);
-			if(pin_state==GPIO_PIN_SET)
-				{
-					
-				}
-				else if(pin_state==GPIO_PIN_RESET)
-				{
-					UI_Print_Bat_Stat(UI_BAT_FULL);
-				}
-				break;
-		}
-	}
+//	uint8_t pin_state=0;
+//	switch(GPIO_Pin){
+//		case GPIO_PIN_2://TP_CHRG Detect:
+//			{
+//				pin_state=HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_2);
+//				if(pin_state==GPIO_PIN_SET)
+//				{
+//					
+//				}
+//				else if(pin_state==GPIO_PIN_RESET)
+//				{
+//					UI_Print_Bat_Stat(UI_BAT_CHRG);
+//				}
+//				break;
+//		}
+//		case GPIO_PIN_4:
+//		{
+//			pin_state=HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_4);
+//			if(pin_state==GPIO_PIN_SET)
+//				{
+//					
+//				}
+//				else if(pin_state==GPIO_PIN_RESET)
+//				{
+//					UI_Print_Bat_Stat(UI_BAT_FULL);
+//				}
+//				break;
+//		}
+//	}
 			
 }
