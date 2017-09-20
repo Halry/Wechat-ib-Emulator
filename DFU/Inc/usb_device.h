@@ -57,11 +57,13 @@
 #include "stm32f1xx.h"
 #include "stm32f1xx_hal.h"
 #include "usbd_def.h"
+	 #include "main.h"
 
 extern USBD_HandleTypeDef hUsbDeviceFS;
 
 /* USB_Device init function */	
 void USB_DEVICE_Init(void);
+void USB_Deivce_DeInit(void);
 void USB_Receive_Handle(void);
 #ifdef __cplusplus
 }

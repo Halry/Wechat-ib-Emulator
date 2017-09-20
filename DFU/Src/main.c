@@ -58,6 +58,7 @@
 uint8_t *USB_RX_Buffer=NULL;
 uint16_t USB_RXed=0;
 bool Is_Connected=false;
+bool Is_Tampered=false;
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 
@@ -118,7 +119,8 @@ int main(void)
 	while(Is_Connected!=true)
 	{
 		if(HAL_GetTick()-sleep_tick>=7000)
-		{			
+		{	
+	USB_Deivce_DeInit()	;		
 			HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
 			HAL_PWR_EnterSTANDBYMode();
 		}

@@ -60,6 +60,7 @@ USBD_HandleTypeDef hUsbDeviceFS;
 extern uint8_t *USB_RX_Buffer;
 extern uint16_t USB_RXed;
 extern bool Is_Connected;
+extern bool Is_Tampered;
 /* init function */				        
 void USB_DEVICE_Init(void)
 {
@@ -75,15 +76,76 @@ void USB_DEVICE_Init(void)
 	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_8,GPIO_PIN_SET);//Enable Enum
 	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_SET);//Show device in BL
 }
+void USB_Deivce_DeInit(void)
+{
+	USBD_DeInit(&hUsbDeviceFS);
+}
 void USB_Receive_Handle(void)
 {
 	if(*(USB_RX_Buffer+USB_RXed-1)==0x1B&&USB_RXed==1)
 		{
+			if(Is_Tampered==true)
+			{
+				CDC_Transmit_FS((uint8_t *)"!Tampered!\r",11);
+			}
 			CDC_Transmit_FS((uint8_t *)"RDY",3);
 			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_RESET);
 			Is_Connected=true;
+			memset(USB_RX_Buffer,'\0',64);
+			USB_RXed=0;
 		}
-		else
+		if(*(USB_RX_Buffer+USB_RXed-1)==0x0D&&Is_Connected==true)
+		{
+			if(Is_Tampered==false)
+			{
+			if((memcmp(USB_RX_Buffer,"ZDN",3))==0)
+			{
+				//Init ZModem download
+			}
+			else if((memcmp(USB_RX_Buffer,"CDN",3))==0)
+			{
+				//Get Encrypted Counter Data
+			}
+			else if((memcmp(USB_RX_Buffer,"RDN",3))==0)
+			{
+				//Get Encrypted Classroom Data
+			}
+			else if((memcmp(USB_RX_Buffer,"RR",2))==0)
+			{
+				//Give Random to PC
+			}
+			else if((memcmp(USB_RX_Buffer,"IDR",3))==0)
+			{
+				//Give Device ID to PC
+			}
+			else if((memcmp(USB_RX_Buffer,"RST",3))==0)
+			{
+				HAL_NVIC_SystemReset();
+			}
+			}
+			else
+			{
+				if((memcmp(USB_RX_Buffer,"TRT",3))==0)
+			{
+				//Get Tamper Reset Data
+			}
+			}
+			#ifdef PROTOTYPE_DFU
+			if((memcmp(USB_RX_Buffer,"PFDN",4))==0)
+			{
+				//Download Unecrypted fw
+			}
+			else if((memcmp(USB_RX_Buffer,"PCDN",4))==0)
+			{
+				//Download Raw Counter data
+			}
+			else if((memcmp(USB_RX_Buffer,"PRDN",4))==0)
+			{
+				//Download Raw Classroom data
+			}
+			#endif
+		}
+		else if(Is_Connected==true)
 		{
 			CDC_Transmit_FS((USB_RX_Buffer+USB_RXed-1),1);
 		}

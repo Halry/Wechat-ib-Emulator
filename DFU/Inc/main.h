@@ -54,6 +54,7 @@
 #include "crypto.h"
 #include "stdbool.h"
 #include "stdlib.h"
+#define PROTOTYPE_DFU
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
