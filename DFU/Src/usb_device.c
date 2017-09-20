@@ -61,6 +61,7 @@ extern uint8_t *USB_RX_Buffer;
 extern uint16_t USB_RXed;
 extern bool Is_Connected;
 extern bool Is_Tampered;
+uint8_t USB_In_Handler=0;
 /* init function */				        
 void USB_DEVICE_Init(void)
 {
@@ -82,6 +83,19 @@ void USB_Deivce_DeInit(void)
 }
 void USB_Receive_Handle(void)
 {
+	switch(USB_In_Handler)
+	{
+		case USB_Not_Hnd:
+			USB_Not_Handled_Handler();
+			break;
+		case USB_In_PCDN:
+			USB_HND_PCDN();
+		default:
+			HAL_NVIC_SystemReset();
+	}
+}
+void USB_Not_Handled_Handler(void)
+{
 	if(*(USB_RX_Buffer+USB_RXed-1)==0x1B&&USB_RXed==1)
 		{
 			if(Is_Tampered==true)
@@ -91,8 +105,7 @@ void USB_Receive_Handle(void)
 			CDC_Transmit_FS((uint8_t *)"RDY",3);
 			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_RESET);
 			Is_Connected=true;
-			memset(USB_RX_Buffer,'\0',64);
-			USB_RXed=0;
+			Clean_USB_RX_Buf();
 		}
 		if(*(USB_RX_Buffer+USB_RXed-1)==0x0D&&Is_Connected==true)
 		{
@@ -137,18 +150,34 @@ void USB_Receive_Handle(void)
 			}
 			else if((memcmp(USB_RX_Buffer,"PCDN",4))==0)
 			{
-				//Download Raw Counter data
+				Clean_USB_RX_Buf();
+				USB_In_Handler=USB_In_PCDN;
 			}
 			else if((memcmp(USB_RX_Buffer,"PRDN",4))==0)
 			{
 				//Download Raw Classroom data
 			}
 			#endif
+			CDC_Transmit_FS((uint8_t *)"UCD\r",4);
+			Clean_USB_RX_Buf();
 		}
 		else if(Is_Connected==true)
 		{
 			CDC_Transmit_FS((USB_RX_Buffer+USB_RXed-1),1);
 		}
+}
+void USB_HND_PCDN(void)
+{
+	CDC_Transmit_FS((USB_RX_Buffer+USB_RXed-1),1);
+	if(*(USB_RX_Buffer+USB_RXed-1)==0x0D&&USB_RXed==4)
+	{
+		
+	}
+}
+void Clean_USB_RX_Buf(void)
+{
+	memset(USB_RX_Buffer,'\0',64);
+	USB_RXed=0;
 }
 /**
   * @}

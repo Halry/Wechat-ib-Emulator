@@ -65,6 +65,9 @@ extern USBD_HandleTypeDef hUsbDeviceFS;
 void USB_DEVICE_Init(void);
 void USB_Deivce_DeInit(void);
 void USB_Receive_Handle(void);
+	 void Clean_USB_RX_Buf(void);
+	 void USB_HND_PCDN(void);
+	 void USB_Not_Handled_Handler(void);
 #ifdef __cplusplus
 }
 #endif

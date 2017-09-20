@@ -49,7 +49,7 @@
 #include "main.h"
 #include "stm32f1xx_hal.h"
 #include "usb_device.h"
-
+RTC_HandleTypeDef hrtc;
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -146,6 +146,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+	RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -219,10 +220,28 @@ static void GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_SET);
-	
+	HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN1);
 	
 }
-
+void Write_BKP(uint8_t loc,uint16_t data)
+{
+	HAL_PWR_EnableBkUpAccess();
+	HAL_RTCEx_BKUPWrite(&hrtc,loc,data);
+}
+void Integer_to_ASCII(uint8_t *Input,uint32_t count)
+{
+  for(uint32_t i=0; i<count; i++)
+  {
+    *(Input+i)=*(Input+i)+'0';
+  }
+}
+void ASCII_to_Integer(uint8_t *Input,uint32_t count)
+{
+  for(uint32_t i=0; i<count; i++)
+  {
+    *(Input+i)=*(Input+i)-'0';
+  }
+}
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */

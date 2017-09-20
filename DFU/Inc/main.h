@@ -56,11 +56,24 @@
 #include "stdlib.h"
 #define PROTOTYPE_DFU
 /* USER CODE END Includes */
-
+#define USB_Not_Hnd 0
+#define USB_In_ZDN 1
+#define USB_In_CDN 2
+#define USB_In_RDN 3
+#define USB_In_RR 4
+#define USB_In_IDR 5
+#define USB_In_TRT 6
+#ifdef PROTOTYPE_DFU
+#define USB_In_PFDN 7
+#define USB_In_PCDN 8
+#define USB_In_PRDN 9
+#endif
 /* Private define ------------------------------------------------------------*/
 
 /* USER CODE BEGIN Private defines */
-
+void Integer_to_ASCII(uint8_t *Input,uint32_t count);
+void ASCII_to_Integer(uint8_t *Input,uint32_t count);
+void Write_BKP(uint8_t loc,uint16_t data);
 /* USER CODE END Private defines */
 
 void _Error_Handler(char *, int);
