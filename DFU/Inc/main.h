@@ -74,6 +74,7 @@
 void Integer_to_ASCII(uint8_t *Input,uint32_t count);
 void ASCII_to_Integer(uint8_t *Input,uint32_t count);
 void Write_BKP(uint8_t loc,uint16_t data);
+uint16_t Read_BKP(uint8_t loc);
 /* USER CODE END Private defines */
 
 void _Error_Handler(char *, int);

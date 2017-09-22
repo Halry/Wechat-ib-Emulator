@@ -57,6 +57,7 @@ RTC_HandleTypeDef hrtc;
 /* Private variables ---------------------------------------------------------*/
 uint8_t *USB_RX_Buffer=NULL;
 uint16_t USB_RXed=0;
+uint16_t USB_RX_Max_Size=64;
 bool Is_Connected=false;
 bool Is_Tampered=false;
 /* USER CODE BEGIN PV */
@@ -104,10 +105,12 @@ int main(void)
   GPIO_Init();
 	//after checking button or fw failed,the usb start
   USB_DEVICE_Init();
-	
 	USB_RX_Buffer=malloc(64);
   /* USER CODE BEGIN 2 */
-
+	#ifndef PROTOTYPE_DFU
+	Is_Tampered=~(Read_BKP(RTC_BKP_DR1)&0x0001);
+	#endif
+	
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -118,7 +121,7 @@ int main(void)
   {
 	while(Is_Connected!=true)
 	{
-		if(HAL_GetTick()-sleep_tick>=7000)
+		if(HAL_GetTick()-sleep_tick>=15000)
 		{	
 	USB_Deivce_DeInit()	;		
 			HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
@@ -174,27 +177,15 @@ void SystemClock_Config(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-
-    /**Configure the Systick interrupt time 
-    */
+/**Configure the Systick interrupt time   */
   HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
-
-    /**Configure the Systick 
-    */
+    /*Configure the Systick */
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
-
   /* SysTick_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 	__HAL_RCC_PWR_CLK_ENABLE();
+	__HAL_RCC_BKP_CLK_ENABLE();
 }
-
-/** Configure pins as 
-        * Analog 
-        * Input 
-        * Output
-        * EVENT_OUT
-        * EXTI
-*/
 static void GPIO_Init(void)
 {
 
@@ -227,6 +218,14 @@ void Write_BKP(uint8_t loc,uint16_t data)
 {
 	HAL_PWR_EnableBkUpAccess();
 	HAL_RTCEx_BKUPWrite(&hrtc,loc,data);
+	HAL_PWR_DisableBkUpAccess();
+}
+uint16_t Read_BKP(uint8_t loc)
+{
+	HAL_PWR_EnableBkUpAccess();
+	uint16_t temp=HAL_RTCEx_BKUPRead(&hrtc,loc);
+	HAL_PWR_DisableBkUpAccess();
+	return temp;
 }
 void Integer_to_ASCII(uint8_t *Input,uint32_t count)
 {

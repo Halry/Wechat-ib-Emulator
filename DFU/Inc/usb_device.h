@@ -66,8 +66,12 @@ void USB_DEVICE_Init(void);
 void USB_Deivce_DeInit(void);
 void USB_Receive_Handle(void);
 	 void Clean_USB_RX_Buf(void);
+	 #ifdef PROTOTYPE_DFU
 	 void USB_HND_PCDN(void);
+	 void USB_HND_PRDN(void);
+	 #endif
 	 void USB_Not_Handled_Handler(void);
+	 void Relocate_USB_Buf(uint16_t size);
 #ifdef __cplusplus
 }
 #endif

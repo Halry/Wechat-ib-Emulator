@@ -54,13 +54,14 @@
 #include "usbd_desc.h"
 #include "usbd_cdc.h"
 #include "usbd_cdc_if.h"
-
+#include "stdlib.h"
 /* USB Device Core handle declaration */
 USBD_HandleTypeDef hUsbDeviceFS;
 extern uint8_t *USB_RX_Buffer;
 extern uint16_t USB_RXed;
 extern bool Is_Connected;
 extern bool Is_Tampered;
+extern uint16_t USB_RX_Max_Size;
 uint8_t USB_In_Handler=0;
 /* init function */				        
 void USB_DEVICE_Init(void)
@@ -90,6 +91,10 @@ void USB_Receive_Handle(void)
 			break;
 		case USB_In_PCDN:
 			USB_HND_PCDN();
+		break;
+		case USB_In_PRDN:
+			USB_HND_PRDN();
+		break;
 		default:
 			HAL_NVIC_SystemReset();
 	}
@@ -155,7 +160,9 @@ void USB_Not_Handled_Handler(void)
 			}
 			else if((memcmp(USB_RX_Buffer,"PRDN",4))==0)
 			{
-				//Download Raw Classroom data
+				Clean_USB_RX_Buf();
+				Relocate_USB_Buf(56);
+				USB_In_Handler=USB_In_PRDN;
 			}
 			#endif
 			CDC_Transmit_FS((uint8_t *)"UCD\r",4);
@@ -166,17 +173,42 @@ void USB_Not_Handled_Handler(void)
 			CDC_Transmit_FS((USB_RX_Buffer+USB_RXed-1),1);
 		}
 }
+#ifdef PROTOTYPE_DFU
 void USB_HND_PCDN(void)
 {
 	CDC_Transmit_FS((USB_RX_Buffer+USB_RXed-1),1);
 	if(*(USB_RX_Buffer+USB_RXed-1)==0x0D&&USB_RXed==4)
 	{
-		
+		ASCII_to_Integer(USB_RX_Buffer,3);
+		uint16_t temp=(*(USB_RX_Buffer)*100)+(*(USB_RX_Buffer+1)*10)+(*(USB_RX_Buffer+2));
+		Write_BKP(RTC_BKP_DR8,temp);
+		Clean_USB_RX_Buf();
+		USB_In_Handler=USB_Not_Hnd;//Go back to no handle.
 	}
 }
+void USB_HND_PRDN(void)
+{
+	CDC_Transmit_FS((USB_RX_Buffer+USB_RXed-1),1);
+	if(*(USB_RX_Buffer+USB_RXed-1)==0x0D&&*(USB_RX_Buffer)>0&&USB_RXed==(((*USB_RX_Buffer)-'0')*9+2))
+		{
+			uint8_t temp_flash[1024];
+			 uint8_t *p=((uint8_t *)0x08000000);
+			memcpy(temp_flash,p,100);
+			memcpy(temp_flash,USB_RX_Buffer,55);
+			Relocate_USB_Buf(64);
+		}
+}
+#endif
 void Clean_USB_RX_Buf(void)
 {
 	memset(USB_RX_Buffer,'\0',64);
+	USB_RXed=0;
+}
+void Relocate_USB_Buf(uint16_t size)
+{
+	free(USB_RX_Buffer);
+	USB_RX_Buffer=malloc(size);
+	USB_RX_Max_Size=size;
 	USB_RXed=0;
 }
 /**
