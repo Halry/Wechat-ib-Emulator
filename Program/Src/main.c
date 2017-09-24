@@ -30,7 +30,7 @@ const char *HW_Ver="1";
 
 int main(void)
 {
-
+	
 	System_Startup_Init();
 	UI_Main();
 	//BT_Init();

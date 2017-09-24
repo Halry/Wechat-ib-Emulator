@@ -53,7 +53,9 @@ RTC_HandleTypeDef hrtc;
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
-
+typedef  void (*pFunction)(void);
+pFunction JumpToApplication;
+uint32_t JumpAddress;
 /* Private variables ---------------------------------------------------------*/
 uint8_t *USB_RX_Buffer=NULL;
 uint16_t USB_RXed=0;
@@ -112,7 +114,18 @@ int main(void)
 	#endif
 	
   /* USER CODE END 2 */
-
+	if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_3)!=GPIO_PIN_RESET)
+	{
+if (((*(__IO uint32_t*)FW_Start_Address) & 0x2FFE0000 ) == 0x20000000)
+    {
+      /* Jump to user application */
+      JumpAddress = *(__IO uint32_t*) (FW_Start_Address + 4);
+      JumpToApplication = (pFunction) JumpAddress;
+      /* Initialize user application's Stack Pointer */
+      __set_MSP(*(__IO uint32_t*) FW_Start_Address);
+      JumpToApplication();
+    }
+	}
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	
@@ -121,11 +134,8 @@ int main(void)
   {
 	while(Is_Connected!=true)
 	{
-		if(HAL_GetTick()-sleep_tick>=30000)
+		if(HAL_GetTick()-sleep_tick>=8000)
 		{	
-	USB_Deivce_DeInit()	;		
-			HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
-			HAL_PWR_EnterSTANDBYMode();
 		}
 	}
   }
@@ -204,6 +214,11 @@ static void GPIO_Init(void)
 	GPIO_InitStruct.Pin = GPIO_PIN_0;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 	GPIO_InitStruct.Pull=GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+	GPIO_InitStruct.Pin = GPIO_PIN_3;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull=GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
   GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_7|GPIO_PIN_8;

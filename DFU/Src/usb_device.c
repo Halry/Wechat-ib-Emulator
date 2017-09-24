@@ -67,6 +67,7 @@ FLASH_EraseInitTypeDef EraseInitStruct;
 uint8_t FW_Dwn_Stage=0;
 uint16_t FW_Dwn_size=0;
 uint16_t FW_Already_Dwn=0;
+uint8_t *FW_temp_pointer=NULL;
 /* init function */				        
 void USB_DEVICE_Init(void)
 {
@@ -101,6 +102,7 @@ void USB_Receive_Handle(void)
 		break;
 		case USB_In_PFDN:
 			USB_HND_PFDN();
+		break;
 		default:
 			HAL_NVIC_SystemReset();
 	}
@@ -122,9 +124,13 @@ void USB_Not_Handled_Handler(void)
 		{
 			if(Is_Tampered==false)
 			{
-			if((memcmp(USB_RX_Buffer,"ZDN",3))==0)
+			if((memcmp(USB_RX_Buffer,"FDN",3))==0)
 			{
-				//Init ZModem download
+				//Download Firmware
+			}
+			else if((memcmp(USB_RX_Buffer,"KDN",3))==0)
+			{
+				//Download Key File
 			}
 			else if((memcmp(USB_RX_Buffer,"CDN",3))==0)
 			{
@@ -199,12 +205,12 @@ void USB_HND_PCDN(void)
 void USB_HND_PRDN(void)
 {
 	CDC_Transmit_FS((USB_RX_Buffer+USB_RXed-1),1);
-	if(*(USB_RX_Buffer+USB_RXed-1)==0x0D&&(*(USB_RX_Buffer)-'0')>0&&USB_RXed==(((*USB_RX_Buffer)-'0')*9+2))
+	if(*(USB_RX_Buffer+USB_RXed-1)==0x0D&&(*(USB_RX_Buffer)-'0')>0&&USB_RXed==(((*USB_RX_Buffer)-'0')*10+2))
 		{
 			uint8_t temp_flash[FLASH_PAGE_SIZE];
 			uint8_t *p=((uint8_t *)Room_Flash_Address);
 			memcpy(temp_flash,p,FLASH_PAGE_SIZE);
-			memcpy(temp_flash,USB_RX_Buffer,USB_RXed-2);
+			memcpy(temp_flash,USB_RX_Buffer,USB_RXed-1);
 			*temp_flash=*temp_flash-'0';
 			HAL_FLASH_Unlock();
 			EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;
@@ -222,6 +228,9 @@ void USB_HND_PRDN(void)
 				HAL_NVIC_SystemReset();
 			}
 			HAL_FLASH_Lock();
+			USB_In_Handler=USB_Not_Hnd;
+			CDC_Transmit_FS((uint8_t*)"Done",4);
+			
 		}
 }
 void USB_HND_PFDN(void)
@@ -232,8 +241,10 @@ void USB_HND_PFDN(void)
 	{
 		ASCII_to_Integer(USB_RX_Buffer,5);
 		FW_Dwn_size=(*(USB_RX_Buffer)*10000)+(*(USB_RX_Buffer+1)*1000)+(*(USB_RX_Buffer+2)*100)+(*(USB_RX_Buffer+3)*10)+(*(USB_RX_Buffer+4));
-		FW_Already_Dwn=FW_Dwn_size;
-		Relocate_USB_Buf(FLASH_PAGE_SIZE);
+		FW_Already_Dwn=0;
+		FW_temp_pointer=USB_RX_Buffer;
+		uint8_t FW_Temp[64];
+		Repoint_USB_Buf(64,FW_Temp);
 		HAL_FLASH_Unlock();
 			EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;
 			EraseInitStruct.PageAddress = FW_Start_Address;
@@ -246,27 +257,33 @@ void USB_HND_PFDN(void)
 			}
 			HAL_FLASH_Lock();
 			FW_Dwn_Stage=FW_DWN_ERASED;
+			CDC_Transmit_FS((uint8_t*)"FWST",4);
+		memset(USB_RX_Buffer,'\0',64);
+	}
 	}
 	else if(FW_Dwn_Stage==FW_DWN_ERASED)
 	{
-		if(FW_Dwn_size-FW_Already_Dwn>=1024)
+		if(FW_Dwn_size-FW_Already_Dwn>=64)
 		{
 			HAL_FLASH_Unlock();
-			Flash_Write(USB_RX_Buffer,(uint8_t*)FW_Start_Address+FW_Already_Dwn,FLASH_PAGE_SIZE);
+			Flash_Write(USB_RX_Buffer,(uint8_t*)FW_Start_Address+FW_Already_Dwn,64);
 			HAL_FLASH_Lock();
-			FW_Already_Dwn+=FLASH_PAGE_SIZE;
+			memset(USB_RX_Buffer,'\0',64);
+			USB_RXed=0;
+			FW_Already_Dwn+=64;
 		}
 		else
 		{
 			HAL_FLASH_Unlock();
 			Flash_Write(USB_RX_Buffer,(uint8_t*)FW_Start_Address+FW_Already_Dwn,FW_Dwn_size-FW_Already_Dwn);
 			HAL_FLASH_Lock();
+			memset(USB_RX_Buffer,'\0',64);
+			Repoint_USB_Buf(64,FW_temp_pointer);
 			FW_Dwn_Stage=FW_DWN_LOADED;
+			USB_In_Handler=USB_Not_Hnd;
+			CDC_Transmit_FS((uint8_t*)"Done",4);
 		}
 	}
-	}
-	
-	
 }
 #endif
 void Clean_USB_RX_Buf(void)
@@ -276,9 +293,15 @@ void Clean_USB_RX_Buf(void)
 }
 void Relocate_USB_Buf(uint16_t size)
 {
+	USB_RX_Buffer=realloc(USB_RX_Buffer,size);
+	USB_RX_Max_Size=size+1;
+	USB_RXed=0;
+}
+void Repoint_USB_Buf(uint16_t size,uint8_t *src)
+{
 	free(USB_RX_Buffer);
-	USB_RX_Buffer=malloc(size);
-	USB_RX_Max_Size=size;
+	USB_RX_Buffer=src;
+	USB_RX_Max_Size=size+1;
 	USB_RXed=0;
 }
 uint16_t Flash_Write(uint8_t *src, uint8_t *dest, uint32_t Len)

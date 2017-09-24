@@ -51,6 +51,7 @@
 #include "UI.h"
 #include "bluetooth_control.h"
 #include "stm32f1xx_hal.h"
+#define Room_Start_Address 0x0801FC00
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/

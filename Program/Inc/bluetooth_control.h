@@ -1,7 +1,9 @@
 #ifndef __bluetooth_control_h
 #define __bluetooth_control_h
 #include "main.h"
-extern const uint8_t BT_Classroom_Minor[3][4];
+extern uint8_t *BT_Classroom_Minor;
+extern uint8_t *BT_Classroom_Name;
+extern uint8_t BT_Classroom_Count;
 extern char *BT_Last_Minor;
 void BT_Init(void);
 bool Start_beacon(uint8_t *minor);

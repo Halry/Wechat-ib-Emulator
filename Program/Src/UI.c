@@ -9,6 +9,7 @@ extern uint16_t BT_Left_ADV_Count;
 extern const char *System_Version;
 extern const char *HW_Ver;
 extern RTC_HandleTypeDef hrtc;
+
 void UI_Print_Bat_Stat(uint8_t bat_stat)
 {
 const uint8_t* bat_bmp_ptr;
@@ -138,25 +139,25 @@ void UI_Classroom_Selection(void)
 		key=Get_Key();
 		if(displayed==false)
 		{
-			for(uint8_t i=0;i<Max_Classroom_Count;i++)
+			for(uint8_t i=0;i<BT_Classroom_Count;i++)
 	{
 		if(i==select)
 		{
 
-				OLED_R_ShowString(0,i+i+1,Classroom_String[i],true);
+				OLED_R_ShowString(0,i+i+1,BT_Classroom_Name+i*6,true);
 
 		}
 		else
 		{
 			
-				OLED_ShowString(0,i+i+1,Classroom_String[i],true);
+				OLED_ShowString(0,i+i+1,BT_Classroom_Name+i*6,true);
 		}
 	}
 	displayed=true;
 		}
 		
 
-		if(key==Key_Down&&(select<(Max_Classroom_Count-1)))
+		if(key==Key_Down&&(select<(BT_Classroom_Count-1)))
 		{
 			select++;
 			displayed=false;
@@ -178,15 +179,15 @@ void UI_Classroom_Selection(void)
 }
 void UI_BT_Adverising(uint8_t select)
 {
-	if(select>(Max_Classroom_Count-1))
+	if(select>(BT_Classroom_Count-1))
 	{
 		UI_Classroom_Selection();
 	}
 	UI_Clear_Below_Stat_Bar();
 	if(BT_Left_ADV_Count>0)
 	{
-	Start_beacon((uint8_t*)BT_Classroom_Minor[select]);
-		OLED_ShowString(0,1,Classroom_String[select],true);
+	Start_beacon(BT_Classroom_Minor+(select*4));
+		OLED_ShowString(0,1,BT_Classroom_Name+select*6,true);
 		OLED_ShowChinese(40,1,Started_Chinese[0]);
 		uint8_t Left_Tick=60;
 		OLED_ShowChar(0,3,(Left_Tick/10)%10+'0',true);

@@ -1,8 +1,10 @@
 #include "bluetooth_control.h"
 extern UART_HandleTypeDef huart1;
 extern RTC_HandleTypeDef hrtc;
-uint8_t const BT_Classroom_Minor[3][4]={{"559D"},{"55A0"},{"55D7"}};
+uint8_t *BT_Classroom_Minor=NULL;
+uint8_t BT_Classroom_Count=0;
 uint8_t *BT_UART_Transmit_Data=NULL;
+uint8_t *BT_Classroom_Name=NULL;
 char *BT_Last_Minor=NULL;
 uint16_t BT_Left_ADV_Count=0;
 void BT_Init()
@@ -30,6 +32,17 @@ void BT_Init()
 		BT_Write_Setup_BKP();
 		USART1_DeInit();
 	}
+	BT_Classroom_Count=(*(uint8_t*)Room_Start_Address);
+	if((BT_Classroom_Minor=malloc(BT_Classroom_Count*4))==NULL)//allocate minor space
+	{
+		//reset
+	}
+	memcpy(BT_Classroom_Minor,(uint8_t*)Room_Start_Address+(BT_Classroom_Count*6)+1,BT_Classroom_Count*4);
+	if((BT_Classroom_Name=malloc(BT_Classroom_Count*5))==NULL)//allocate name space
+	{
+		//reset
+	}
+	memcpy(BT_Classroom_Name,(uint8_t*)Room_Start_Address+1,BT_Classroom_Count*6);
 } 
 void BT_UART_Handler(uint8_t *data,uint16_t size)
 {
