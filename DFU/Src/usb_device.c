@@ -64,6 +64,9 @@ extern bool Is_Tampered;
 extern uint16_t USB_RX_Max_Size;
 uint8_t USB_In_Handler=0;
 FLASH_EraseInitTypeDef EraseInitStruct;
+uint8_t FW_Dwn_Stage=0;
+uint16_t FW_Dwn_size=0;
+uint16_t FW_Already_Dwn=0;
 /* init function */				        
 void USB_DEVICE_Init(void)
 {
@@ -96,6 +99,8 @@ void USB_Receive_Handle(void)
 		case USB_In_PRDN:
 			USB_HND_PRDN();
 		break;
+		case USB_In_PFDN:
+			USB_HND_PFDN();
 		default:
 			HAL_NVIC_SystemReset();
 	}
@@ -152,7 +157,11 @@ void USB_Not_Handled_Handler(void)
 			#ifdef PROTOTYPE_DFU
 			if((memcmp(USB_RX_Buffer,"PFDN",4))==0)
 			{
-				//Download Unecrypted fw
+				Clean_USB_RX_Buf();
+				Relocate_USB_Buf(6);
+				USB_In_Handler=USB_In_PFDN;
+				CDC_Transmit_FS((uint8_t*)"FS",2);
+				FW_Dwn_Stage=FW_DWN_INIT;
 			}
 			else if((memcmp(USB_RX_Buffer,"PCDN",4))==0)
 			{
@@ -190,15 +199,16 @@ void USB_HND_PCDN(void)
 void USB_HND_PRDN(void)
 {
 	CDC_Transmit_FS((USB_RX_Buffer+USB_RXed-1),1);
-	if(*(USB_RX_Buffer+USB_RXed-1)==0x0D&&*(USB_RX_Buffer)>0&&USB_RXed==(((*USB_RX_Buffer)-'0')*9+2))
+	if(*(USB_RX_Buffer+USB_RXed-1)==0x0D&&(*(USB_RX_Buffer)-'0')>0&&USB_RXed==(((*USB_RX_Buffer)-'0')*9+2))
 		{
 			uint8_t temp_flash[FLASH_PAGE_SIZE];
-			 uint8_t *p=((uint8_t *)0x0801FC00);
+			uint8_t *p=((uint8_t *)Room_Flash_Address);
 			memcpy(temp_flash,p,FLASH_PAGE_SIZE);
 			memcpy(temp_flash,USB_RX_Buffer,USB_RXed-2);
+			*temp_flash=*temp_flash-'0';
 			HAL_FLASH_Unlock();
 			EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;
-			EraseInitStruct.PageAddress = 0x0801FC00;
+			EraseInitStruct.PageAddress = Room_Flash_Address;
 			EraseInitStruct.NbPages     =1;
 			uint32_t erase_error=0;
 			if(HAL_FLASHEx_Erase(&EraseInitStruct,&erase_error)!=HAL_OK)
@@ -206,7 +216,7 @@ void USB_HND_PRDN(void)
 				//go to error
 				HAL_NVIC_SystemReset();
 			}
-			if(Flash_Write(temp_flash,(uint8_t *)0x0801FC00,FLASH_PAGE_SIZE)!=0)
+			if(Flash_Write(temp_flash,(uint8_t *)Room_Flash_Address,FLASH_PAGE_SIZE)!=0)
 			{
 				//go to error
 				HAL_NVIC_SystemReset();
@@ -216,6 +226,47 @@ void USB_HND_PRDN(void)
 }
 void USB_HND_PFDN(void)
 {
+	if(FW_Dwn_Stage==FW_DWN_INIT)
+	{
+	if(*(USB_RX_Buffer+USB_RXed-1)==0x0D&&USB_RXed==6)
+	{
+		ASCII_to_Integer(USB_RX_Buffer,5);
+		FW_Dwn_size=(*(USB_RX_Buffer)*10000)+(*(USB_RX_Buffer+1)*1000)+(*(USB_RX_Buffer+2)*100)+(*(USB_RX_Buffer+3)*10)+(*(USB_RX_Buffer+4));
+		FW_Already_Dwn=FW_Dwn_size;
+		Relocate_USB_Buf(FLASH_PAGE_SIZE);
+		HAL_FLASH_Unlock();
+			EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;
+			EraseInitStruct.PageAddress = FW_Start_Address;
+			EraseInitStruct.NbPages     =64;
+			uint32_t erase_error=0;
+			if(HAL_FLASHEx_Erase(&EraseInitStruct,&erase_error)!=HAL_OK)
+			{
+				//go to error
+				HAL_NVIC_SystemReset();
+			}
+			HAL_FLASH_Lock();
+			FW_Dwn_Stage=FW_DWN_ERASED;
+	}
+	else if(FW_Dwn_Stage==FW_DWN_ERASED)
+	{
+		if(FW_Dwn_size-FW_Already_Dwn>=1024)
+		{
+			HAL_FLASH_Unlock();
+			Flash_Write(USB_RX_Buffer,(uint8_t*)FW_Start_Address+FW_Already_Dwn,FLASH_PAGE_SIZE);
+			HAL_FLASH_Lock();
+			FW_Already_Dwn+=FLASH_PAGE_SIZE;
+		}
+		else
+		{
+			HAL_FLASH_Unlock();
+			Flash_Write(USB_RX_Buffer,(uint8_t*)FW_Start_Address+FW_Already_Dwn,FW_Dwn_size-FW_Already_Dwn);
+			HAL_FLASH_Lock();
+			FW_Dwn_Stage=FW_DWN_LOADED;
+		}
+	}
+	}
+	
+	
 }
 #endif
 void Clean_USB_RX_Buf(void)
