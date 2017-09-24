@@ -63,6 +63,7 @@ extern bool Is_Connected;
 extern bool Is_Tampered;
 extern uint16_t USB_RX_Max_Size;
 uint8_t USB_In_Handler=0;
+FLASH_EraseInitTypeDef EraseInitStruct;
 /* init function */				        
 void USB_DEVICE_Init(void)
 {
@@ -191,12 +192,30 @@ void USB_HND_PRDN(void)
 	CDC_Transmit_FS((USB_RX_Buffer+USB_RXed-1),1);
 	if(*(USB_RX_Buffer+USB_RXed-1)==0x0D&&*(USB_RX_Buffer)>0&&USB_RXed==(((*USB_RX_Buffer)-'0')*9+2))
 		{
-			uint8_t temp_flash[1024];
-			 uint8_t *p=((uint8_t *)0x08000000);
-			memcpy(temp_flash,p,100);
-			memcpy(temp_flash,USB_RX_Buffer,55);
-			Relocate_USB_Buf(64);
+			uint8_t temp_flash[FLASH_PAGE_SIZE];
+			 uint8_t *p=((uint8_t *)0x0801FC00);
+			memcpy(temp_flash,p,FLASH_PAGE_SIZE);
+			memcpy(temp_flash,USB_RX_Buffer,USB_RXed-2);
+			HAL_FLASH_Unlock();
+			EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;
+			EraseInitStruct.PageAddress = 0x0801FC00;
+			EraseInitStruct.NbPages     =1;
+			uint32_t erase_error=0;
+			if(HAL_FLASHEx_Erase(&EraseInitStruct,&erase_error)!=HAL_OK)
+			{
+				//go to error
+				HAL_NVIC_SystemReset();
+			}
+			if(Flash_Write(temp_flash,(uint8_t *)0x0801FC00,FLASH_PAGE_SIZE)!=0)
+			{
+				//go to error
+				HAL_NVIC_SystemReset();
+			}
+			HAL_FLASH_Lock();
 		}
+}
+void USB_HND_PFDN(void)
+{
 }
 #endif
 void Clean_USB_RX_Buf(void)
@@ -210,6 +229,31 @@ void Relocate_USB_Buf(uint16_t size)
 	USB_RX_Buffer=malloc(size);
 	USB_RX_Max_Size=size;
 	USB_RXed=0;
+}
+uint16_t Flash_Write(uint8_t *src, uint8_t *dest, uint32_t Len)
+{
+  uint32_t i = 0;
+  
+  for(i = 0; i < Len; i+=4)
+  {
+    /* Device voltage range supposed to be [2.7V to 3.6V], the operation will
+       be done by byte */ 
+    if(HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, (uint32_t)(dest+i), *(uint32_t*)(src+i)) == HAL_OK)
+    {
+     /* Check the written value */
+      if(*(uint32_t *)(src + i) != *(uint32_t*)(dest+i))
+      {
+        /* Flash content doesn't match SRAM content */
+        return 2;
+      }
+    }
+    else
+    {
+      /* Error occurred while writing data in Flash memory */
+      return 1;
+    }
+  }
+  return 0;
 }
 /**
   * @}

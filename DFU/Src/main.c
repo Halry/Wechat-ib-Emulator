@@ -121,7 +121,7 @@ int main(void)
   {
 	while(Is_Connected!=true)
 	{
-		if(HAL_GetTick()-sleep_tick>=15000)
+		if(HAL_GetTick()-sleep_tick>=30000)
 		{	
 	USB_Deivce_DeInit()	;		
 			HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);

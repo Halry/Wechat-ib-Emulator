@@ -72,6 +72,8 @@ void USB_Receive_Handle(void);
 	 #endif
 	 void USB_Not_Handled_Handler(void);
 	 void Relocate_USB_Buf(uint16_t size);
+	 uint16_t Flash_Write(uint8_t *src, uint8_t *dest, uint32_t Len);
+void USB_HND_PFDN(void);
 #ifdef __cplusplus
 }
 #endif
