@@ -113,6 +113,9 @@
   #define HSI_VALUE    ((uint32_t)8000000) /*!< Value of the Internal oscillator in Hz*/
 #endif /* HSI_VALUE */
 
+#if !defined  (LSI_VALUE) 
+ #define LSI_VALUE               40000U 
+ #endif
 /**
   * @brief External Low Speed oscillator (LSE) value.
   *        This value is used by the UART, RTC HAL module to compute the system frequency

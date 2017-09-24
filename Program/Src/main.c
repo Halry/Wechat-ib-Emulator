@@ -17,7 +17,8 @@ uint8_t Signin_Count;
 extern TIM_HandleTypeDef htim4;
                                 
                                 
-
+const char *System_Version="0.21b";
+const char *HW_Ver="1";
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
 
@@ -29,7 +30,7 @@ extern TIM_HandleTypeDef htim4;
 
 int main(void)
 {
-
+	
 	System_Startup_Init();
 	UI_Main();
 	//BT_Init();
@@ -50,6 +51,5 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if(htim->Instance==TIM4)//every 10ms action
 	{	
 		Key_Scan();
-		ADC_Action(false);
 	}
 }

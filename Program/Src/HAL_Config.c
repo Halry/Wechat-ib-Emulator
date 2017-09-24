@@ -6,21 +6,24 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 UART_HandleTypeDef huart1;
+//DMA
+DMA_HandleTypeDef hdma_adc1;
+DMA_HandleTypeDef hdma_spi2_tx;
+extern const char *System_Version;
+extern const char *HW_Ver;
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-
-void Downclock_to_HSI(void)
+bool Sys_In_HS_CLK=false;
+void System_Clock_Ctrl(uint8_t Clock_Sel)
 {
 
   RCC_OscInitTypeDef RCC_OscInitStruct;
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
   RCC_PeriphCLKInitTypeDef PeriphClkInit;
-	
 	HAL_RCC_DeInit();
-
-    /**Initializes the CPU, AHB and APB busses clocks 
-    */
+if(Clock_Sel==LS_CLK)
+{
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
-   RCC_OscInitStruct.HSEState = RCC_HSE_OFF;
+  RCC_OscInitStruct.HSEState = RCC_HSE_OFF;
   RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.LSIState = RCC_LSI_OFF;
@@ -31,50 +34,26 @@ void Downclock_to_HSI(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK|RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;//AHB=24Mhz
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;//APB1=12Mhz
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV8;//APB2=3Mhz
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_ADC;
-  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
-  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV2;
+	PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV2;//ADC=1.5Mhz
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-    /**Initializes the CPU, AHB and APB busses clocks 
-    */
-	HAL_RCC_GetHCLKFreq();
-	HAL_RCC_GetPCLK1Freq();
-	HAL_RCC_GetPCLK1Freq();
-    /**Configure the Systick interrupt time 
-    */
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
-
-    /**Configure the Systick 
-    */
-  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
-__HAL_RCC_PWR_CLK_ENABLE();
-	
 }
-void OverClock_to_HSE(void)
+else//HS CLK
 {
-	 RCC_OscInitTypeDef RCC_OscInitStruct;
-  RCC_ClkInitTypeDef RCC_ClkInitStruct;
-  RCC_PeriphCLKInitTypeDef PeriphClkInit;
-
-	HAL_RCC_DeInit();
-    /**Initializes the CPU, AHB and APB busses clocks 
-    */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
-   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.LSIState = RCC_LSI_ON;
@@ -86,43 +65,42 @@ void OverClock_to_HSE(void)
     _Error_Handler(__FILE__, __LINE__);
   }
 
-    /**Initializes the CPU, AHB and APB busses clocks 
-    */
 RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;//AHB=72Mhz
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;//APB1=18Mhz
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;//APB2=72Mhz
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_ADC;
-  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
+	  PeriphClkInit.PeriphClockSelection =RCC_PERIPHCLK_ADC;
   PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV6;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  {
+		_Error_Handler(__FILE__, __LINE__);
+	} 
+}
+if(__HAL_RCC_GET_FLAG(RCC_FLAG_LSERDY)==false)
+{
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC;
+  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-HAL_RCC_GetHCLKFreq();
-	HAL_RCC_GetPCLK1Freq();
-	HAL_RCC_GetPCLK1Freq();
-    /**Configure the Systick interrupt time 
-    */
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
-
-    /**Configure the Systick 
-    */
-  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
-
 }
-/* ADC1 init function */
+	HAL_RCC_GetHCLKFreq();
+	HAL_RCC_GetPCLK1Freq();
+	HAL_RCC_GetPCLK1Freq();
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+	__HAL_RCC_DMA1_CLK_ENABLE();
+}
+/* ADC1 function */
 void ADC1_Init(void)
 {
-    /**Common config 
-    */
   hadc1.Instance = ADC1;
   hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
@@ -134,10 +112,8 @@ void ADC1_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-	HAL_NVIC_SetPriority(ADC1_IRQn,2,0);
+	HAL_NVIC_SetPriority(ADC1_IRQn,1,0);
 HAL_NVIC_EnableIRQ(ADC1_IRQn);
-    /**Configure Regular Channel 
-    */
 }
 void ADC1_DeInit(void)
 {
@@ -171,30 +147,6 @@ void RTC_Init(void)
   }
 
 }
-
-/* SPI2 init function */
-void SPI2_Init(void)
-{
-
-  hspi2.Instance = SPI2;
-  hspi2.Init.Mode = SPI_MODE_MASTER;
-  hspi2.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi2.Init.NSS = SPI_NSS_HARD_OUTPUT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-  hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi2.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi2) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-}
-
 /* TIM2 init function */
 void TIM2_Init(void)
 {
@@ -279,7 +231,6 @@ void TIM4_Start(void)
   {
      _Error_Handler(__FILE__, __LINE__);
   }
-  __HAL_TIM_SetCounter(&htim4, 0);
   __HAL_TIM_CLEAR_FLAG(&htim4, TIM_FLAG_UPDATE);
   __HAL_TIM_CLEAR_IT(&htim4, TIM_IT_UPDATE);
   HAL_NVIC_SetPriority(TIM4_IRQn, 2, 0);
@@ -398,6 +349,7 @@ void _Error_Handler(char * file, int line)
 void System_Startup_Init(void)
 {
 	HAL_DeInit();
+<<<<<<< HEAD
 	 HAL_Init();
 	 Downclock_to_HSI();
   GPIO_Init();
@@ -414,6 +366,18 @@ if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0)==GPIO_PIN_SET)
 		}
 	}
 	
+=======
+	HAL_Init();
+	System_Clock_Ctrl(LS_CLK);
+  GPIO_Init();
+if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0)==GPIO_PIN_SET)
+{
+	#ifndef SYS_DBG
+	HAL_Delay(2000);
+		if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0)==GPIO_PIN_SET)
+{
+	//go on
+>>>>>>> development
 }
 else
 {
@@ -421,13 +385,23 @@ else
 	System_low_power(PWR_STDBY);
 	#endif
 }
+<<<<<<< HEAD
  RTC_Init();
   SPI2_Init();
 	UI_Print_Bat_Stat(UI_BAT_EMPTY);
   //TIM2_Init();
   //TIM3_Init();
+=======
+	#endif
+}
+ //RTC_Init();
+>>>>>>> development
 	OLED_Init();
-		ADC_Action(true);
+	UI_Show_Please_Wait();
+	OLED_ShowString(0,3,(uint8_t*)"SW:",true);
+	OLED_ShowString(24,3,(uint8_t*)System_Version,true);
+	OLED_ShowString(0,5,(uint8_t*)"HW:",true);
+	OLED_ShowString(24,5,(uint8_t*)HW_Ver,true);
 	TIM4_Start();
 	BT_Init();
 }

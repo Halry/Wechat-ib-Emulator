@@ -13,7 +13,10 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 void Key_Handle(void);
 void UI_Main(void);
 void UI_Classroom_Selection(void);
-void UI_Settings_Selection(void);
+void UI_Settings(void);
 void UI_BT_Adverising(uint8_t select);
-
+void UI_Update_Left_Count(void);
+void UI_Power_Off(void);
+void UI_Settings_Selection(uint8_t select);
+void UI_Show_Please_Wait(void);
 #endif

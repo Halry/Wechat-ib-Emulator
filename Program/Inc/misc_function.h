@@ -10,12 +10,12 @@
 //ADC Function Flag
 #define ADC_Sample_Busy 1
 #define ADC_Sample_Start 0
-#define ADC_Sample_Tick_Start 1000
+#define ADC_Sample_Tick_Start 2000
 //Voltage define
 #define ADC_BAT_HALF 2.375
 #define ADC_BAT_EMPTY 2
 #define ADC_BAT_SHUTDOWN 1.875
-
+//Pwr Control Define
 #define PWR_STDBY 0
 #define PWR_SLEP 1
 #define PWR_STOP 2
