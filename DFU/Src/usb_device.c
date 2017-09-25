@@ -68,6 +68,10 @@ uint8_t FW_Dwn_Stage=0;
 uint16_t FW_Dwn_size=0;
 uint16_t FW_Already_Dwn=0;
 uint8_t *FW_temp_pointer=NULL;
+uint32_t RDY_Sys_Tick=0;
+uint32_t RR_Sys_Tick=0;
+extern bool Is_DRNG_Get;
+extern uint8_t DRNG_Output[16];
 /* init function */				        
 void USB_DEVICE_Init(void)
 {
@@ -115,6 +119,7 @@ void USB_Not_Handled_Handler(void)
 				CDC_Transmit_FS((uint8_t *)"!Tampered!\r\n",12);
 			}
 			CDC_Transmit_FS((uint8_t *)"RDY\r\n",5);
+			RDY_Sys_Tick=HAL_GetTick();
 			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_RESET);
 			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_SET);
 			Is_Connected=true;
@@ -142,7 +147,26 @@ void USB_Not_Handled_Handler(void)
 			}
 			else if((memcmp(USB_RX_Buffer,"RR",2))==0)
 			{
+				RR_Sys_Tick=HAL_GetTick();
 				//Give Random to PC
+				if(Is_DRNG_Get==false)
+				{
+				uint8_t status=Get_DRNG();
+				if(status!=RNG_SUCCESS)
+				{
+					CDC_Transmit_FS((uint8_t *)"RNG Err:",8);	
+					CDC_Transmit_FS(&status,1);
+					Clean_USB_RX_Buf();
+				}
+				else
+				{
+					CDC_Transmit_FS(&DRNG_Output[0],16);
+				}
+			}
+				else
+				{
+					CDC_Transmit_FS(&DRNG_Output[0],16);
+				}
 			}
 			else if((memcmp(USB_RX_Buffer,"IDR",3))==0)
 			{

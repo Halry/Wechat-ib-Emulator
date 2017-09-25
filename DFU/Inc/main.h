@@ -52,8 +52,11 @@
 
 /* USER CODE BEGIN Includes */
 #include "crypto.h"
+#include "stm32f1xx_hal.h"
 #include "stdbool.h"
 #include "stdlib.h"
+#include "crypto_if.h"
+#include "string.h"
 #define PROTOTYPE_DFU
 /* USER CODE END Includes */
 #define USB_Not_Hnd 0

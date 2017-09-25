@@ -47,7 +47,6 @@
   */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "stm32f1xx_hal.h"
 #include "usb_device.h"
 RTC_HandleTypeDef hrtc;
 /* USER CODE BEGIN Includes */
@@ -210,6 +209,7 @@ void SystemClock_Config(void)
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 	__HAL_RCC_PWR_CLK_ENABLE();
 	__HAL_RCC_BKP_CLK_ENABLE();
+	__HAL_RCC_CRC_CLK_ENABLE();
 }
 static void GPIO_Init(void)
 {
