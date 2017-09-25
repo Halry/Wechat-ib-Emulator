@@ -81,7 +81,6 @@ void USB_DEVICE_Init(void)
   USBD_Start(&hUsbDeviceFS);
 	
 	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_8,GPIO_PIN_SET);//Enable Enum
-	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_SET);//Show device in BL
 }
 void USB_Deivce_DeInit(void)
 {
@@ -109,14 +108,15 @@ void USB_Receive_Handle(void)
 }
 void USB_Not_Handled_Handler(void)
 {
-	if(*(USB_RX_Buffer+USB_RXed-1)==0x1B&&USB_RXed==1)
+	if(*(USB_RX_Buffer+USB_RXed-1)==0x0D&&USB_RXed==1)
 		{
 			if(Is_Tampered==true)
 			{
-				CDC_Transmit_FS((uint8_t *)"!Tampered!\r",11);
+				CDC_Transmit_FS((uint8_t *)"!Tampered!\r\n",12);
 			}
-			CDC_Transmit_FS((uint8_t *)"RDY",3);
+			CDC_Transmit_FS((uint8_t *)"RDY\r\n",5);
 			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_SET);
 			Is_Connected=true;
 			Clean_USB_RX_Buf();
 		}
@@ -166,7 +166,7 @@ void USB_Not_Handled_Handler(void)
 				Clean_USB_RX_Buf();
 				Relocate_USB_Buf(6);
 				USB_In_Handler=USB_In_PFDN;
-				CDC_Transmit_FS((uint8_t*)"FS",2);
+				CDC_Transmit_FS((uint8_t*)"FS\r\n",4);
 				FW_Dwn_Stage=FW_DWN_INIT;
 			}
 			else if((memcmp(USB_RX_Buffer,"PCDN",4))==0)
@@ -177,17 +177,21 @@ void USB_Not_Handled_Handler(void)
 			else if((memcmp(USB_RX_Buffer,"PRDN",4))==0)
 			{
 				Clean_USB_RX_Buf();
-				Relocate_USB_Buf(56);
+				Relocate_USB_Buf(64);
 				USB_In_Handler=USB_In_PRDN;
 			}
 			#endif
-			CDC_Transmit_FS((uint8_t *)"UCD\r",4);
+			CDC_Transmit_FS((uint8_t *)"UCD\r\n",4);
 			Clean_USB_RX_Buf();
 		}
 		else if(Is_Connected==true)
 		{
 			CDC_Transmit_FS((USB_RX_Buffer+USB_RXed-1),1);
 		}
+}
+void USB_HND_FDN(void)
+{
+	
 }
 #ifdef PROTOTYPE_DFU
 void USB_HND_PCDN(void)
@@ -205,6 +209,11 @@ void USB_HND_PCDN(void)
 void USB_HND_PRDN(void)
 {
 	CDC_Transmit_FS((USB_RX_Buffer+USB_RXed-1),1);
+	if(*(USB_RX_Buffer)-'0'>6)
+	{
+		USB_In_Handler=USB_Not_Hnd;
+		CDC_Transmit_FS((uint8_t*)"Err\r\n",5);
+	}
 	if(*(USB_RX_Buffer+USB_RXed-1)==0x0D&&(*(USB_RX_Buffer)-'0')>0&&USB_RXed==(((*USB_RX_Buffer)-'0')*10+2))
 		{
 			uint8_t temp_flash[FLASH_PAGE_SIZE];
@@ -229,7 +238,7 @@ void USB_HND_PRDN(void)
 			}
 			HAL_FLASH_Lock();
 			USB_In_Handler=USB_Not_Hnd;
-			CDC_Transmit_FS((uint8_t*)"Done",4);
+			CDC_Transmit_FS((uint8_t*)"Done\r\n",6);
 			
 		}
 }
@@ -257,7 +266,7 @@ void USB_HND_PFDN(void)
 			}
 			HAL_FLASH_Lock();
 			FW_Dwn_Stage=FW_DWN_ERASED;
-			CDC_Transmit_FS((uint8_t*)"FWST",4);
+			CDC_Transmit_FS((uint8_t*)"FWST\r\n",6);
 		memset(USB_RX_Buffer,'\0',64);
 	}
 	}
@@ -266,6 +275,7 @@ void USB_HND_PFDN(void)
 		if(FW_Dwn_size-FW_Already_Dwn>=64)
 		{
 			HAL_FLASH_Unlock();
+			HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_7);
 			Flash_Write(USB_RX_Buffer,(uint8_t*)FW_Start_Address+FW_Already_Dwn,64);
 			HAL_FLASH_Lock();
 			memset(USB_RX_Buffer,'\0',64);
@@ -278,10 +288,11 @@ void USB_HND_PFDN(void)
 			Flash_Write(USB_RX_Buffer,(uint8_t*)FW_Start_Address+FW_Already_Dwn,FW_Dwn_size-FW_Already_Dwn);
 			HAL_FLASH_Lock();
 			memset(USB_RX_Buffer,'\0',64);
+			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_RESET);
 			Repoint_USB_Buf(64,FW_temp_pointer);
 			FW_Dwn_Stage=FW_DWN_LOADED;
 			USB_In_Handler=USB_Not_Hnd;
-			CDC_Transmit_FS((uint8_t*)"Done",4);
+			CDC_Transmit_FS((uint8_t*)"Done\r\n",6);
 		}
 	}
 }
@@ -294,6 +305,7 @@ void Clean_USB_RX_Buf(void)
 void Relocate_USB_Buf(uint16_t size)
 {
 	USB_RX_Buffer=realloc(USB_RX_Buffer,size);
+	memset(USB_RX_Buffer,'\0',size);
 	USB_RX_Max_Size=size+1;
 	USB_RXed=0;
 }

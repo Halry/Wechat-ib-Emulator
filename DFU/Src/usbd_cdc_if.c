@@ -268,9 +268,6 @@ static int8_t CDC_Control_FS  (uint8_t cmd, uint8_t* pbuf, uint16_t length)
   */
 static int8_t CDC_Receive_FS (uint8_t* Buf, uint32_t *Len)
 {
-	#ifdef PROTOTYPE_DFU
-	uint32_t i=*Len;
-	#endif
 	if(USB_RXed+*Len<USB_RX_Max_Size)
 	{
 		memcpy((USB_RX_Buffer+USB_RXed),Buf,*Len);

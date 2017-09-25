@@ -121,6 +121,8 @@ void System_low_power(uint8_t low_power_type)
 	switch(low_power_type)
 	{
 		case PWR_STDBY:
+			__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+		__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
 			HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
 			HAL_PWR_EnterSTANDBYMode();
 	}

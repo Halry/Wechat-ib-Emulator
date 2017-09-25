@@ -278,10 +278,11 @@ void UI_Settings_Selection(uint8_t select)
 		}
 		case 1://DFU
 		{
+			while(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_3)==GPIO_PIN_RESET);
 			HAL_PWR_EnableBkUpAccess();
 			uint16_t DR0_BK=0;
 			DR0_BK=HAL_RTCEx_BKUPRead(&hrtc,RTC_BKP_DR1);
-			DR0_BK=DR0_BK|1;
+			DR0_BK=DR0_BK|0x0002;
 			HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR1,DR0_BK);
 			HAL_PWR_DisableBkUpAccess();
 			NVIC_SystemReset();

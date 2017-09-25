@@ -114,8 +114,9 @@ int main(void)
 	#endif
 	
   /* USER CODE END 2 */
-	if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_3)!=GPIO_PIN_RESET)
+	if((HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_3)!=GPIO_PIN_RESET&&(Read_BKP(RTC_BKP_DR1)&0x0002)==0)||HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_1)==GPIO_PIN_RESET)
 	{
+		Write_BKP(RTC_BKP_DR1,Read_BKP(RTC_BKP_DR1)&~0x0002);
 if (((*(__IO uint32_t*)FW_Start_Address) & 0x2FFE0000 ) == 0x20000000)
     {
       /* Jump to user application */
@@ -130,12 +131,26 @@ if (((*(__IO uint32_t*)FW_Start_Address) & 0x2FFE0000 ) == 0x20000000)
   /* USER CODE BEGIN WHILE */
 	
 	uint32_t sleep_tick=HAL_GetTick();
+	
   while (1)
   {
 	while(Is_Connected!=true)
 	{
-		if(HAL_GetTick()-sleep_tick>=8000)
+		uint32_t pwr_hold_tick=HAL_GetTick();
+		while(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0)==SET)
+		{
+			if(HAL_GetTick()-pwr_hold_tick>=3000)
+			{
+				Write_BKP(RTC_BKP_DR1,Read_BKP(RTC_BKP_DR1)&~0x0002);
+				HAL_NVIC_SystemReset();
+			}
+		}
+		if(HAL_GetTick()-sleep_tick>=15000)
 		{	
+			__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+			__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
+			HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
+			HAL_PWR_EnterSTANDBYMode();
 		}
 	}
   }
@@ -225,7 +240,7 @@ static void GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_SET);
 	HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN1);
 	
 }
