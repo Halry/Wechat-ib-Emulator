@@ -126,7 +126,7 @@ void BT_Read_Setup_BKP(void)
 		*(BT_Last_Minor+3)=BT_Minor_BKP;
 		BT_Left_ADV_Count=HAL_RTCEx_BKUPRead(&hrtc,RTC_BKP_DR8);
 		#ifdef SYS_DBG
-		//BT_Left_ADV_Count=999;
+		BT_Left_ADV_Count=999;
 		#endif
 		HAL_PWR_DisableBkUpAccess();
 }

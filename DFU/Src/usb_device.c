@@ -170,7 +170,7 @@ void USB_Not_Handled_Handler(void)
 			}
 			else if((memcmp(USB_RX_Buffer,"IDR",3))==0)
 			{
-				//Give Device ID to PC
+				CDC_Transmit_FS((uint8_t*)0x1FFFF7E8,12);
 			}
 			else if((memcmp(USB_RX_Buffer,"RST",3))==0)
 			{
@@ -181,7 +181,16 @@ void USB_Not_Handled_Handler(void)
 			{
 				if((memcmp(USB_RX_Buffer,"TRT",3))==0)
 			{
-				//Get Tamper Reset Data
+				///Send RR and Device id
+				RR_Sys_Tick=HAL_GetTick();
+				//Give Random to PC
+				uint8_t status=Get_DRNG();
+				if(status!=RNG_SUCCESS)
+				{
+					HAL_NVIC_SystemReset();
+				}
+				CDC_Transmit_FS(&DRNG_Output[0],16);
+				CDC_Transmit_FS((uint8_t*)0x1FFFF7E8,12);
 			}
 			}
 			#ifdef PROTOTYPE_DFU
