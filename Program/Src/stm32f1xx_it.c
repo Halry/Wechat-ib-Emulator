@@ -50,7 +50,7 @@ extern DMA_HandleTypeDef hdma_adc1;
 extern DMA_HandleTypeDef hdma_spi2_tx;
 extern DMA_HandleTypeDef hdma_usart1_tx;
 /******************************************************************************/
-/*            Cortex-M3 Processor Interruption and Exception Handlers         */ 
+/*            Cortex-M3 Processor Interruption and Exception Handlers         */
 /******************************************************************************/
 
 /**
@@ -59,11 +59,9 @@ extern DMA_HandleTypeDef hdma_usart1_tx;
 void NMI_Handler(void)
 {
   /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
-
   /* USER CODE END NonMaskableInt_IRQn 0 */
   HAL_RCC_NMI_IRQHandler();
   /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
-
   /* USER CODE END NonMaskableInt_IRQn 1 */
 }
 
@@ -73,13 +71,11 @@ void NMI_Handler(void)
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
-
   /* USER CODE END HardFault_IRQn 0 */
-  while (1)
-  {
-  }
+  while(1)
+    {
+    }
   /* USER CODE BEGIN HardFault_IRQn 1 */
-
   /* USER CODE END HardFault_IRQn 1 */
 }
 
@@ -89,13 +85,11 @@ void HardFault_Handler(void)
 void MemManage_Handler(void)
 {
   /* USER CODE BEGIN MemoryManagement_IRQn 0 */
-
   /* USER CODE END MemoryManagement_IRQn 0 */
-  while (1)
-  {
-  }
+  while(1)
+    {
+    }
   /* USER CODE BEGIN MemoryManagement_IRQn 1 */
-
   /* USER CODE END MemoryManagement_IRQn 1 */
 }
 
@@ -105,13 +99,11 @@ void MemManage_Handler(void)
 void BusFault_Handler(void)
 {
   /* USER CODE BEGIN BusFault_IRQn 0 */
-
   /* USER CODE END BusFault_IRQn 0 */
-  while (1)
-  {
-  }
+  while(1)
+    {
+    }
   /* USER CODE BEGIN BusFault_IRQn 1 */
-
   /* USER CODE END BusFault_IRQn 1 */
 }
 
@@ -121,13 +113,11 @@ void BusFault_Handler(void)
 void UsageFault_Handler(void)
 {
   /* USER CODE BEGIN UsageFault_IRQn 0 */
-
   /* USER CODE END UsageFault_IRQn 0 */
-  while (1)
-  {
-  }
+  while(1)
+    {
+    }
   /* USER CODE BEGIN UsageFault_IRQn 1 */
-
   /* USER CODE END UsageFault_IRQn 1 */
 }
 
@@ -137,10 +127,8 @@ void UsageFault_Handler(void)
 void SVC_Handler(void)
 {
   /* USER CODE BEGIN SVCall_IRQn 0 */
-
   /* USER CODE END SVCall_IRQn 0 */
   /* USER CODE BEGIN SVCall_IRQn 1 */
-
   /* USER CODE END SVCall_IRQn 1 */
 }
 
@@ -150,10 +138,8 @@ void SVC_Handler(void)
 void DebugMon_Handler(void)
 {
   /* USER CODE BEGIN DebugMonitor_IRQn 0 */
-
   /* USER CODE END DebugMonitor_IRQn 0 */
   /* USER CODE BEGIN DebugMonitor_IRQn 1 */
-
   /* USER CODE END DebugMonitor_IRQn 1 */
 }
 
@@ -163,10 +149,8 @@ void DebugMon_Handler(void)
 void PendSV_Handler(void)
 {
   /* USER CODE BEGIN PendSV_IRQn 0 */
-
   /* USER CODE END PendSV_IRQn 0 */
   /* USER CODE BEGIN PendSV_IRQn 1 */
-
   /* USER CODE END PendSV_IRQn 1 */
 }
 
@@ -176,12 +160,10 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
-
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   HAL_SYSTICK_IRQHandler();
   /* USER CODE BEGIN SysTick_IRQn 1 */
-
   /* USER CODE END SysTick_IRQn 1 */
 }
 
@@ -198,23 +180,21 @@ void SysTick_Handler(void)
 void TAMPER_IRQHandler(void)
 {
   /* USER CODE BEGIN TAMPER_IRQn 0 */
-
   /* USER CODE END TAMPER_IRQn 0 */
   HAL_RTCEx_TamperIRQHandler(&hrtc);
   /* USER CODE BEGIN TAMPER_IRQn 1 */
-
   /* USER CODE END TAMPER_IRQn 1 */
 }
 void ADC1_2_IRQHandler(void)
 {
-	HAL_ADC_IRQHandler(&hadc1);
+  HAL_ADC_IRQHandler(&hadc1);
 }
 void RCC_IRQHandler(void)
 {
 }
 void USART1_IRQHandler(void)
 {
-	HAL_UART_IRQHandler(&huart1);
+  HAL_UART_IRQHandler(&huart1);
 }
 void RTC_Alarm_IRQHandler(void)
 {
@@ -224,23 +204,23 @@ void SPI2_IRQHandler(void)
 }
 void TIM4_IRQHandler(void)//Key Scan timer
 {
-	HAL_TIM_IRQHandler(&htim4);
+  HAL_TIM_IRQHandler(&htim4);
 }
 void EXTI0_IRQHandler(void)//X Button interrupt(Only for enable scan timer)
 {
-	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
 }
 void EXTI2_IRQHandler(void)//TP CHRG
 {
-	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2);
 }
 void EXTI3_IRQHandler(void)//Yes button
 {
-	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_3);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_3);
 }
 void EXTI4_IRQHandler(void)//TP_STDBY
 {
-	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_4);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_4);
 }
 void EXTI9_5_IRQHandler(void)//TP CE
 {
@@ -253,7 +233,7 @@ void PVD_IRQHandler(void)//Display BAT low and put system to standby mode.
 }
 void DMA1_Channel1_IRQHandler(void)
 {
-	HAL_DMA_IRQHandler(&hdma_adc1);
+  HAL_DMA_IRQHandler(&hdma_adc1);
 }
 void DMA1_Channel5_IRQHandler(void)
 {

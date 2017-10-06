@@ -24,16 +24,13 @@
 #define Key_Up 2
 #define Key_Down 3
 #define Key_OK 4
-#define Key_RST_Combine 5
-#define Key_Press_Count 3
-#define Key_Hold_Tick 250
+#define GPIO_Key_X GPIO_PIN_0
+#define GPIO_Key_Up GPIO_PIN_1
+#define GPIO_Key_Down GPIO_PIN_2
+#define GPIO_Key_OK GPIO_PIN_3
 extern bool UI_BAT_Charging;
-//ADC Value Define
-extern bool ADC_Get_Value_Done;
-extern uint16_t ADC_Value[3];
-uint8_t ADC_Get_Value(void);
-void Key_Scan(void);
+uint8_t Key_Scan(void);
 void System_low_power(uint8_t low_power_type);
-void ADC_Action(bool Is_Init);
-uint8_t Get_Key(void);
+uint16_t Get_Key(bool is_cnt);
+void Reset_Key_State(void);
 #endif
