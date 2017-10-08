@@ -81,22 +81,13 @@ static void GPIO_Init(void);
 
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
-  /* USER CODE END 1 */
-  /* MCU Configuration----------------------------------------------------------*/
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-  /* USER CODE BEGIN Init */
-  /* USER CODE END Init */
+
   /* Configure the system clock */
   SystemClock_Config();
-  /* USER CODE BEGIN SysInit */
-  /* USER CODE END SysInit */
-  /* Initialize all configured peripherals */
+
   GPIO_Init();
-  //after checking button or fw failed,the usb start
-  USB_DEVICE_Init();
-  USB_RX_Buffer=malloc(64);
   /* USER CODE BEGIN 2 */
 #ifndef PROTOTYPE_DFU
   Is_Tampered=~(Read_BKP(RTC_BKP_DR1)&0x0001);
@@ -115,6 +106,9 @@ int main(void)
       JumpToApplication();
       }
     }
+		  //after checking button or fw failed,the usb start
+	USB_DEVICE_Init();
+  USB_RX_Buffer=malloc(64);
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   uint32_t sleep_tick=HAL_GetTick();
@@ -131,7 +125,7 @@ int main(void)
           HAL_NVIC_SystemReset();
           }
         }
-      if(HAL_GetTick()-sleep_tick>=15000)
+      if(HAL_GetTick()-sleep_tick>=30000)
         {
         __HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
         __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);

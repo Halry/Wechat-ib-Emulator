@@ -127,7 +127,8 @@ void USB_Not_Handled_Handler(void)
       {
       if((memcmp(USB_RX_Buffer,"FDN",3))==0)
         {
-        //Download Firmware
+					Clean_USB_RX_Buf();
+        CDC_Transmit_FS((uint8_t *)"KEK Files",8);
         }
       else if((memcmp(USB_RX_Buffer,"KDN",3))==0)
         {
