@@ -72,6 +72,7 @@ uint32_t RDY_Sys_Tick=0;
 uint32_t RR_Sys_Tick=0;
 extern bool Is_DRNG_Get;
 extern uint8_t DRNG_Output[16];
+
 /* init function */
 void USB_DEVICE_Init(void)
 {
@@ -127,12 +128,13 @@ void USB_Not_Handled_Handler(void)
       {
       if((memcmp(USB_RX_Buffer,"FDN",3))==0)
         {
-					Clean_USB_RX_Buf();
-        CDC_Transmit_FS((uint8_t *)"KEK Files",8);
+					
+					
         }
       else if((memcmp(USB_RX_Buffer,"KDN",3))==0)
         {
         //Download Key File
+					
         }
       else if((memcmp(USB_RX_Buffer,"CDN",3))==0)
         {
