@@ -51,8 +51,8 @@ void Base16_Encode(const uint8_t *input, uint16_t input_len, uint8_t *output, ui
   int i;
   for(i = 0; i < input_len; i++)
     {
-    output[2 * i] = (input[i] & 0xF) + 'A';
-    output[2 * i + 1] = ((input[i] >> 4) & 0xF) + 'A';
+    output[2 * i] = (input[i]>> 4) + 'A';
+    output[2 * i + 1] = ((input[i] ) ) + 'A';
     }
   if(output_len!=NULL)
     *output_len = 2 * input_len;
