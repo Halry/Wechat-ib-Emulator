@@ -71,7 +71,7 @@ uint8_t *FW_temp_pointer=NULL;
 uint32_t RDY_Sys_Tick=0;
 uint32_t RR_Sys_Tick=0;
 extern bool Is_DRNG_Get;
-extern uint8_t DRNG_Output[16];
+extern uint8_t DRNG_Output_B16[16];
 
 /* init function */
 void USB_DEVICE_Init(void)
@@ -159,12 +159,12 @@ void USB_Not_Handled_Handler(void)
             }
           else
             {
-            CDC_Transmit_FS(&DRNG_Output[0],16);
+            CDC_Transmit_FS(&DRNG_Output_B16[0],32);
             }
           }
         else
           {
-          CDC_Transmit_FS(&DRNG_Output[0],16);
+          CDC_Transmit_FS(&DRNG_Output_B16[0],32);
           }
         }
       else if((memcmp(USB_RX_Buffer,"IDR",3))==0)
