@@ -83,10 +83,8 @@ int main(void)
 {
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-
   /* Configure the system clock */
   SystemClock_Config();
-
   GPIO_Init();
   /* USER CODE BEGIN 2 */
 #ifndef PROTOTYPE_DFU
@@ -106,8 +104,8 @@ int main(void)
       JumpToApplication();
       }
     }
-		  //after checking button or fw failed,the usb start
-	USB_DEVICE_Init();
+  //after checking button or fw failed,the usb start
+  USB_DEVICE_Init();
   USB_RX_Buffer=malloc(64);
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */

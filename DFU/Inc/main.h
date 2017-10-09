@@ -60,16 +60,15 @@
 #define PROTOTYPE_DFU
 /* USER CODE END Includes */
 #define USB_Not_Hnd 0
-#define USB_In_ZDN 1
+#define USB_In_FDN 1
 #define USB_In_CDN 2
 #define USB_In_RDN 3
-#define USB_In_RR 4
-#define USB_In_IDR 5
-#define USB_In_TRT 6
+#define USB_In_TRT 5
+#define USB_In_KDN 4
 #ifdef PROTOTYPE_DFU
-#define USB_In_PFDN 7
-#define USB_In_PCDN 8
-#define USB_In_PRDN 9
+#define USB_In_PFDN 6
+#define USB_In_PCDN 7
+#define USB_In_PRDN 8
 #endif
 #define FW_Start_Address 0x08009000 //35k bootloader
 #define Room_Flash_Address 0x0801FC00

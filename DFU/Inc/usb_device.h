@@ -72,12 +72,17 @@ void Clean_USB_RX_Buf(void);
 #ifdef PROTOTYPE_DFU
 void USB_HND_PCDN(void);
 void USB_HND_PRDN(void);
+void USB_HND_PFDN(void);
 #endif
 void USB_Not_Handled_Handler(void);
 void Relocate_USB_Buf(uint16_t size);
 uint16_t Flash_Write(uint8_t *src, uint8_t *dest, uint32_t Len);
 void Repoint_USB_Buf(uint16_t size,uint8_t *src);
-void USB_HND_PFDN(void);
+void USB_HND_TRT(void);
+void USB_HND_FDN(void);
+void USB_HND_KDN(void);
+void USB_HND_RDN(void);
+void USB_HND_CDN(void);
 #ifdef __cplusplus
 }
 #endif

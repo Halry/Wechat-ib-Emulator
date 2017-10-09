@@ -72,7 +72,8 @@ uint32_t RDY_Sys_Tick=0;
 uint32_t RR_Sys_Tick=0;
 extern bool Is_DRNG_Get;
 extern uint8_t DRNG_Output_B16[16];
-
+bool Is_Key_File_OK=false;
+uint8_t Device_ID_B16[24];
 /* init function */
 void USB_DEVICE_Init(void)
 {
@@ -94,6 +95,22 @@ void USB_Receive_Handle(void)
     case USB_Not_Hnd:
       USB_Not_Handled_Handler();
       break;
+		case USB_In_TRT:
+			USB_HND_TRT();
+		break;
+		case USB_In_RDN:
+			USB_HND_RDN();
+		break;
+		case USB_In_CDN:
+			USB_HND_CDN();
+		break;
+		case USB_In_FDN:
+			USB_HND_FDN();
+		break;
+		case USB_In_KDN:
+			USB_HND_KDN();
+		break;
+		#ifdef PROTOTYPE_DFU
     case USB_In_PCDN:
       USB_HND_PCDN();
       break;
@@ -103,18 +120,24 @@ void USB_Receive_Handle(void)
     case USB_In_PFDN:
       USB_HND_PFDN();
       break;
+		#endif
     default:
       HAL_NVIC_SystemReset();
     }
 }
 void USB_Not_Handled_Handler(void)
 {
-  if(*(USB_RX_Buffer+USB_RXed-1)==0x0D&&USB_RXed==1)
+  if(*(USB_RX_Buffer+USB_RXed-1)==0x0D&&USB_RXed==1&&Is_Connected==false)
     {
     if(Is_Tampered==true)
       {
       CDC_Transmit_FS((uint8_t *)"!Tampered!\r\n",12);
       }
+			CDC_Transmit_FS((uint8_t *)"Device:BT_Beacon_Emulator\r\n",27);
+			Base16_Encode((uint8_t*)0x1FFFF7E8,12,Device_ID_B16,NULL);
+			CDC_Transmit_FS((uint8_t *)"Device ID:",10);
+			CDC_Transmit_FS(Device_ID_B16,24);
+			CDC_Transmit_FS((uint8_t *)"\r\n",2);
     CDC_Transmit_FS((uint8_t *)"RDY\r\n",5);
     RDY_Sys_Tick=HAL_GetTick();
     HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_RESET);
@@ -128,12 +151,15 @@ void USB_Not_Handled_Handler(void)
       {
       if((memcmp(USB_RX_Buffer,"FDN",3))==0)
         {
-					
-					
+					if(Is_Key_File_OK==false)
+					{
+						CDC_Transmit_FS((uint8_t *)"No KEY",6);
+					}
         }
       else if((memcmp(USB_RX_Buffer,"KDN",3))==0)
         {
         //Download Key File
+					USB_In_Handler=USB_In_KDN;
 					
         }
       else if((memcmp(USB_RX_Buffer,"CDN",3))==0)
@@ -155,21 +181,26 @@ void USB_Not_Handled_Handler(void)
             {
             CDC_Transmit_FS((uint8_t *)"RNG Err:",8);
             CDC_Transmit_FS(&status,1);
+						CDC_Transmit_FS((uint8_t *)"\r\n",2);
             Clean_USB_RX_Buf();
             }
           else
             {
             CDC_Transmit_FS(&DRNG_Output_B16[0],32);
+							Clean_USB_RX_Buf();
             }
           }
         else
           {
           CDC_Transmit_FS(&DRNG_Output_B16[0],32);
+						Clean_USB_RX_Buf();
           }
         }
       else if((memcmp(USB_RX_Buffer,"IDR",3))==0)
         {
-        CDC_Transmit_FS((uint8_t*)0x1FFFF7E8,12);
+        CDC_Transmit_FS(Device_ID_B16,24);
+					CDC_Transmit_FS((uint8_t *)"\r\n",2);
+					Clean_USB_RX_Buf();
         }
       else if((memcmp(USB_RX_Buffer,"RST",3))==0)
         {
@@ -188,8 +219,10 @@ void USB_Not_Handled_Handler(void)
           {
           HAL_NVIC_SystemReset();
           }
-        CDC_Transmit_FS(&DRNG_Output[0],16);
-        CDC_Transmit_FS((uint8_t*)0x1FFFF7E8,12);
+        CDC_Transmit_FS(&DRNG_Output_B16[0],32);
+        CDC_Transmit_FS(Device_ID_B16,24);
+					Clean_USB_RX_Buf();
+					USB_In_Handler=USB_In_TRT;
         }
       }
 #ifdef PROTOTYPE_DFU
@@ -222,6 +255,18 @@ void USB_Not_Handled_Handler(void)
     }
 }
 void USB_HND_FDN(void)
+{
+}
+void USB_HND_TRT(void)
+{
+}
+void USB_HND_KDN(void)
+{
+}
+void USB_HND_CDN(void)
+{
+}
+void USB_HND_RDN(void)
 {
 }
 #ifdef PROTOTYPE_DFU

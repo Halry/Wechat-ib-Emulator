@@ -12,7 +12,7 @@ uint8_t Get_DRNG(void)
   uint8_t DRNG_Entropy[20];
   uint8_t DRNG_Nonce[8];
   uint8_t DRNG_PS[12];
-	uint8_t DRNG_Output[16];
+  uint8_t DRNG_Output[16];
   //Init DRNG Entropy
   memcpy(DRNG_Entropy,&RDY_Sys_Tick,4);
   memcpy(DRNG_Entropy+4,&RR_Sys_Tick,4);
@@ -42,17 +42,18 @@ uint8_t Get_DRNG(void)
     {
     return RNG_State;
     }
-		Base16_Encode(DRNG_Output,16,DRNG_Output_B16,NULL);
+  Base16_Encode(DRNG_Output,16,DRNG_Output_B16,NULL);
   Is_DRNG_Get=true;
   return RNG_State;
 }
 void Base16_Encode(const uint8_t *input, uint16_t input_len, uint8_t *output, uint16_t *output_len)
 {
-	int i;
-	for (i = 0; i < input_len; i++) {
-		output[2 * i] = (input[i] & 0xF) + 'A';
-		output[2 * i + 1] = ((input[i] >> 4) & 0xF) + 'A';
-	}
-if(output_len!=NULL)
-	*output_len = 2 * input_len;
+  int i;
+  for(i = 0; i < input_len; i++)
+    {
+    output[2 * i] = (input[i] & 0xF) + 'A';
+    output[2 * i + 1] = ((input[i] >> 4) & 0xF) + 'A';
+    }
+  if(output_len!=NULL)
+    *output_len = 2 * input_len;
 }
