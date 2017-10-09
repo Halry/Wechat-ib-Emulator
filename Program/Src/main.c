@@ -13,7 +13,6 @@
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
-uint8_t Signin_Count;
 extern TIM_HandleTypeDef htim4;
 
 
@@ -32,9 +31,6 @@ int main(void)
 {
   System_Startup_Init();
   UI_Main();
-  //BT_Init();
-  //HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
-  //HAL_PWR_EnterSTANDBYMode();
   while(1)
     {
     /* USER CODE END WHILE */

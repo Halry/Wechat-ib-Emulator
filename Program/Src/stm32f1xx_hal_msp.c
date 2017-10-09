@@ -75,6 +75,12 @@ void HAL_MspInit(void)
   /**NOJTAG: JTAG-DP Disabled and SW-DP Enabled
   */
   __HAL_AFIO_REMAP_SWJ_NOJTAG();
+	#ifdef SYS_DBG
+	__HAL_AFIO_REMAP_SWJ_NOJTAG();
+	#endif
+	#ifndef SYS_DBG
+	__HAL_AFIO_REMAP_SWJ_DISABLE();
+	#endif
   /* USER CODE BEGIN MspInit 1 */
   /* USER CODE END MspInit 1 */
 }

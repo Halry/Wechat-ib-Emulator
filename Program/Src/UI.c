@@ -293,6 +293,12 @@ void UI_Settings_Selection(uint8_t select)
       OLED_ShowString(24,1,(uint8_t*)System_Version,true);
       OLED_ShowString(0,3,(uint8_t*)"HW:",true);
       OLED_ShowString(24,3,(uint8_t*)HW_Ver,true);
+			#ifdef SYS_DBG 
+				OLED_ShowString(0,5,(uint8_t*)"Debug FW!",true);
+				#endif
+				#ifndef SYS_DBG
+				OLED_ShowString(0,5,(uint8_t*)"Design by Halry",true);
+				#endif
       while(1)
         {
         uint8_t key=Get_Key(false);
@@ -314,6 +320,7 @@ void UI_Show_Please_Wait(void)
 }
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_Pin);
   uint8_t pin_state=0;
   switch(GPIO_Pin)
     {

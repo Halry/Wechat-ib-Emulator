@@ -274,7 +274,7 @@ void GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-  /*Configure GPIO pins : PB2 PB4 */
+			  /*Configure GPIO pins : PB2 PB4 */
   //PB2:TP_CHRG PB4:TP_STD
   GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
@@ -292,10 +292,8 @@ void GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_14
                     |GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,GPIO_PIN_SET);
-  HAL_NVIC_SetPriority(EXTI2_IRQn, 4, 0);//TP_CHRG Detect
-  HAL_NVIC_EnableIRQ(EXTI2_IRQn);
-  HAL_NVIC_SetPriority(EXTI4_IRQn, 4, 0);//TP_STDBY Detect
-  HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+  HAL_NVIC_SetPriority(EXTI2_IRQn, 15, 0);//TP_CHRG Detect
+  HAL_NVIC_SetPriority(EXTI4_IRQn, 15, 0);//TP_STDBY Detect
 }
 
 /* USER CODE BEGIN 4 */

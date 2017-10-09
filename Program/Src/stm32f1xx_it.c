@@ -208,6 +208,7 @@ void TIM4_IRQHandler(void)//Key Scan timer
 }
 void EXTI0_IRQHandler(void)//X Button interrupt(Only for enable scan timer)
 {
+	
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
 }
 void EXTI2_IRQHandler(void)//TP CHRG

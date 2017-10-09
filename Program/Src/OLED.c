@@ -419,7 +419,7 @@ void OLED_Init(void)
   OLED_WR_Byte(0x10,OLED_CMD_FLAG);//---set high column address
   OLED_WR_Byte(0x40,OLED_CMD_FLAG);//--set start line address  Set Mapping RAM Display Start Line (0x00~0x3F)
   OLED_WR_Byte(0x81,OLED_CMD_FLAG);//--set contrast control register
-  OLED_WR_Byte(0xCF,OLED_CMD_FLAG); // Set SEG Output Current Brightness
+  OLED_WR_Byte(0x01,OLED_CMD_FLAG); // Set SEG Output Current Brightness
   OLED_WR_Byte(0xA1,OLED_CMD_FLAG);//--Set SEG/Column Mapping     0xa0 0xa1
   OLED_WR_Byte(0xC8,OLED_CMD_FLAG);//Set COM/Row Scan Direction   0xc0 0xc8
   OLED_WR_Byte(0xA6,OLED_CMD_FLAG);//--set normal display
@@ -469,6 +469,17 @@ void OLED_PowerOff()
   OLED_Ready=false;
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
   OLED_SPI_Ctrl(false);
+}
+void OLED_Switch(bool enable)
+{
+	if(enable==true)
+	{
+		OLED_WR_Byte(0xAF,OLED_CMD_FLAG);
+	}
+	else
+	{
+		OLED_WR_Byte(0xAE,OLED_CMD_FLAG);
+	}
 }
 void OLED_SPI_Ctrl(bool enabled)
 {
