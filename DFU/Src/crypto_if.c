@@ -49,10 +49,11 @@ uint8_t Get_DRNG(void)
 void Base16_Encode(const uint8_t *input, uint16_t input_len, uint8_t *output, uint16_t *output_len)
 {
   int i;
+	const uint8_t hex_digits[16] = "0123456789abcdef";
   for(i = 0; i < input_len; i++)
     {
-    output[2 * i] = (input[i]>> 4) + 'A';
-    output[2 * i + 1] = ((input[i] ) ) + 'A';
+    output[2 * i] = hex_digits[(input[i]>>4) ];
+    output[2 * i + 1] = hex_digits[input[i]&0xF];
     }
   if(output_len!=NULL)
     *output_len = 2 * input_len;

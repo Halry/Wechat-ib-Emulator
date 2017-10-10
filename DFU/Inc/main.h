@@ -64,7 +64,6 @@
 #define USB_In_CDN 2
 #define USB_In_RDN 3
 #define USB_In_TRT 5
-#define USB_In_KDN 4
 #ifdef PROTOTYPE_DFU
 #define USB_In_PFDN 6
 #define USB_In_PCDN 7

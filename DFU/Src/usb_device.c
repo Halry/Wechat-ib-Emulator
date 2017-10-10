@@ -23,7 +23,6 @@ uint32_t RDY_Sys_Tick=0;
 uint32_t RR_Sys_Tick=0;
 extern bool Is_DRNG_Get;
 extern uint8_t DRNG_Output_B16[32];
-bool Is_Key_File_OK=false;
 uint8_t Device_ID_B16[24];
 /* init function */
 void USB_DEVICE_Init(void)
@@ -57,9 +56,6 @@ void USB_Receive_Handle(void)
 		break;
 		case USB_In_FDN:
 			USB_HND_FDN();
-		break;
-		case USB_In_KDN:
-			USB_HND_KDN();
 		break;
 		#ifdef PROTOTYPE_DFU
     case USB_In_PCDN:
@@ -98,16 +94,6 @@ void USB_Not_Handled_Handler(void)
       {
       if((memcmp(USB_RX_Buffer,"FDN",3))==0)
         {
-					if(Is_Key_File_OK==false)
-					{
-						CDC_Transmit_FS((uint8_t *)"No KEY",6);
-					}
-        }
-      else if((memcmp(USB_RX_Buffer,"KDN",3))==0)
-        {
-        //Download Key File
-					USB_In_Handler=USB_In_KDN;
-					Clean_USB_RX_Buf();
 					
         }
       else if((memcmp(USB_RX_Buffer,"CDN",3))==0)
@@ -208,9 +194,6 @@ void USB_HND_FDN(void)
 {
 }
 void USB_HND_TRT(void)
-{
-}
-void USB_HND_KDN(void)
 {
 }
 void USB_HND_CDN(void)

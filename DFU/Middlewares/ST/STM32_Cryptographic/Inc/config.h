@@ -229,7 +229,7 @@ int32_t STM32_GetCryptoLibrarySettings(STM32CryptoLibVer_TypeDef * LibVersion);
     * @defgroup EncDecConf Encryption and/or Decryption functionalities
     * @{
     */
-#define INCLUDE_ENCRYPTION  ((uint8_t)0x01) /*!< Includes the Encryption functionalities in the library.*/
+//#define INCLUDE_ENCRYPTION  ((uint8_t)0x01) /*!< Includes the Encryption functionalities in the library.*/
 #define INCLUDE_DECRYPTION  ((uint8_t)0x02) /*!< Includes the Decryption functionalities in the library.*/
 
   /**
@@ -243,11 +243,11 @@ int32_t STM32_GetCryptoLibrarySettings(STM32CryptoLibVer_TypeDef * LibVersion);
 
 //#define INCLUDE_DES              ((uint16_t)0x0001) /*!< DES functions are included in the library.                          */
 //#define INCLUDE_TDES             ((uint16_t)0x0002) /*!< TripleDES (TDES) functions are included in the library.             */
-#define INCLUDE_AES128           ((uint16_t)0x0004) /*!< AES functions with key size of 128 bit are included in the library. */
-#define INCLUDE_AES192           ((uint16_t)0x0008) /*!< AES functions with key size of 192 bit are included in the library. */
-#define INCLUDE_AES256           ((uint16_t)0x0010) /*!< AES functions with key size of 256 bit are included in the library. */
+//#define INCLUDE_AES128           ((uint16_t)0x0004) /*!< AES functions with key size of 128 bit are included in the library. */
+//#define INCLUDE_AES192           ((uint16_t)0x0008) /*!< AES functions with key size of 192 bit are included in the library. */
+//#define INCLUDE_AES256           ((uint16_t)0x0010) /*!< AES functions with key size of 256 bit are included in the library. */
 //#define INCLUDE_ARC4             ((uint16_t)0x0020) /*!< ARC4 functions are included in the library.                         */
-#define INCLUDE_CHACHA           ((uint16_t)0x0040) /*!< ChaCha functions are included in the library.                       */
+//#define INCLUDE_CHACHA           ((uint16_t)0x0040) /*!< ChaCha functions are included in the library.                       */
 #define INCLUDE_CHACHA20POLY1305 ((uint16_t)0x0080) /*!< oly1305-AES functions are included in the library                   */
 
   /**
@@ -282,7 +282,7 @@ int32_t STM32_GetCryptoLibrarySettings(STM32CryptoLibVer_TypeDef * LibVersion);
 //#define INCLUDE_RSA        (uint16_t)0x0001) /*!< RSA functions for signature verification are included in the library */
 //#define INCLUDE_ECC        (uint16_t)0x0002) /*!< ECC functions are included in the library                            */
 #define INCLUDE_ED25519    (uint16_t)0x0004) /*!< ED25519 functions are included in the library                        */
-#define INCLUDE_CURVE25519 (uint16_t)0x0008) /*!< Curve25519 functions are included in the library                     */
+//#define INCLUDE_CURVE25519 (uint16_t)0x0008) /*!< Curve25519 functions are included in the library                     */
   /**
     * @}    End of AsymKeyConf
     */
@@ -295,11 +295,11 @@ int32_t STM32_GetCryptoLibrarySettings(STM32CryptoLibVer_TypeDef * LibVersion);
 //#define INCLUDE_MD5      ((uint16_t)0x0001) /*!< MD5 functions are included in the library                                           */
 //#define INCLUDE_SHA1     ((uint16_t)0x0002) /*!< SHA-1 functions are included in the library                                         */
 //#define INCLUDE_SHA224   ((uint16_t)0x0004) /*!< SHA-224 functions are included in the library                                       */
-#define INCLUDE_SHA256   ((uint16_t)0x0008) /*!< SHA-256 functions are included in the library                                       */
+//#define INCLUDE_SHA256   ((uint16_t)0x0008) /*!< SHA-256 functions are included in the library                                       */
 //#define INCLUDE_SHA384   ((uint16_t)0x0010) /*!< SHA-384 functions are included in the library                                       */
-//#define INCLUDE_SHA512   ((uint16_t)0x0020) /*!< SHA-512 functions are included in the library                                       */
-#define INCLUDE_HMAC     ((uint16_t)0x0040) /*!< Select if, for the selected hash algorithms, HMAC should be included in the library */
-#define INCLUDE_HKDF     ((uint16_t)0x0080) /*!< Select if including the HKDF key derivation function, it requires HMAC              */
+#define INCLUDE_SHA512   ((uint16_t)0x0020) /*!< SHA-512 functions are included in the library                                       */
+//#define INCLUDE_HMAC     ((uint16_t)0x0040) /*!< Select if, for the selected hash algorithms, HMAC should be included in the library */
+//#define INCLUDE_HKDF     ((uint16_t)0x0080) /*!< Select if including the HKDF key derivation function, it requires HMAC              */
 
 
   /**
