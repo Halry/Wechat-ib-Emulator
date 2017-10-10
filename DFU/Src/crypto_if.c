@@ -51,7 +51,10 @@ uint8_t Get_DRNG(void)
 bool Verify_FW(uint8_t *sign)
 {
 }
-void cc20_init
+void cc20_init(void)
+{
+	
+}
 void Base16_Encode(const uint8_t *input, uint16_t input_len, uint8_t *output, uint16_t *output_len)
 {
   int i;

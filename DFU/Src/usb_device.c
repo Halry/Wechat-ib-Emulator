@@ -231,8 +231,13 @@ void USB_HND_FDN(void)
     HAL_FLASH_Lock();
 			}
 			FW_Dwn_Stage=FW_DWN_SIGN_LOADED;
+			Clean_USB_RX_Buf();
 		}
 		else if(FW_Dwn_Stage==FW_DWN_SIGN_LOADED)
+		{
+			
+		}
+		else if(FW_Dwn_Stage==FW_DWN_IV_LOADED)
 		{
 			HAL_FLASH_Unlock();
       EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;

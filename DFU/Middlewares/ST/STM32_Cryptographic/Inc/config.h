@@ -247,8 +247,8 @@ int32_t STM32_GetCryptoLibrarySettings(STM32CryptoLibVer_TypeDef * LibVersion);
 //#define INCLUDE_AES192           ((uint16_t)0x0008) /*!< AES functions with key size of 192 bit are included in the library. */
 //#define INCLUDE_AES256           ((uint16_t)0x0010) /*!< AES functions with key size of 256 bit are included in the library. */
 //#define INCLUDE_ARC4             ((uint16_t)0x0020) /*!< ARC4 functions are included in the library.                         */
-//#define INCLUDE_CHACHA           ((uint16_t)0x0040) /*!< ChaCha functions are included in the library.                       */
-#define INCLUDE_CHACHA20POLY1305 ((uint16_t)0x0080) /*!< oly1305-AES functions are included in the library                   */
+#define INCLUDE_CHACHA           ((uint16_t)0x0040) /*!< ChaCha functions are included in the library.                       */
+//#define INCLUDE_CHACHA20POLY1305 ((uint16_t)0x0080) /*!< oly1305-AES functions are included in the library                   */
 
   /**
     * @}   End of SymKeyConf
