@@ -6,6 +6,8 @@ extern uint32_t RDY_Sys_Tick;
 extern uint32_t RR_Sys_Tick;
 uint8_t DRNG_Output_B16[32];
 bool Is_DRNG_Get=0;
+const uint8_t ed25519_pk[32];
+const uint8_t cc20_key[32];
 uint8_t Get_DRNG(void)
 {
   uint8_t RNG_State=0;
@@ -46,10 +48,14 @@ uint8_t Get_DRNG(void)
   Is_DRNG_Get=true;
   return RNG_State;
 }
+bool Verify_FW(uint8_t *sign)
+{
+}
+void cc20_init
 void Base16_Encode(const uint8_t *input, uint16_t input_len, uint8_t *output, uint16_t *output_len)
 {
   int i;
-	const uint8_t hex_digits[16] = "0123456789abcdef";
+	const uint8_t hex_digits[16] = "0123456789ABCDEF";
   for(i = 0; i < input_len; i++)
     {
     output[2 * i] = hex_digits[(input[i]>>4) ];

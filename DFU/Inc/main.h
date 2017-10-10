@@ -71,8 +71,8 @@
 #endif
 #define FW_Start_Address 0x08009000 //35k bootloader
 #define Room_Flash_Address 0x0801FC00
-#define FW_Size_Address 0x0801FC37
-#define FW_Hash_Address 0x0801FC3B
+#define FW_Size_Address 0x0801FC3D
+#define FW_Sign_Address 0x0801FC3F
 /* Private define ------------------------------------------------------------*/
 
 /* USER CODE BEGIN Private defines */
