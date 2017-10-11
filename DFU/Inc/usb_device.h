@@ -61,7 +61,6 @@ extern "C" {
 #define FW_DWN_INIT 0
 #define FW_DWN_ERASED 1
 #define FW_DWN_LOADED 2
-#define FW_DWN_HASHED 3
 	#define FW_DWN_SIZE_LOADED 4
 	#define FW_DWN_SIGN_LOADED 5
 extern USBD_HandleTypeDef hUsbDeviceFS;
