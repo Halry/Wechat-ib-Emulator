@@ -24,6 +24,7 @@ uint32_t RR_Sys_Tick=0;
 extern bool Is_DRNG_Get;
 extern uint8_t DRNG_Output_B16[32];
 uint8_t Device_ID_B16[24];
+extern uint8_t cc20_iv[8];
 /* init function */
 void USB_DEVICE_Init(void)
 {
@@ -193,6 +194,7 @@ void USB_HND_FDN(void)
 {
 	if(FW_Dwn_Stage==FW_DWN_INIT)
     {
+			FW_Already_Dwn=0;
     if(*(USB_RX_Buffer+USB_RXed-1)!=0&&USB_RXed==2)
       {
 				FW_Dwn_size=(((uint16_t)*USB_RX_Buffer)<<8)|((uint16_t)*USB_RX_Buffer+1);
@@ -235,10 +237,10 @@ void USB_HND_FDN(void)
 		}
 		else if(FW_Dwn_Stage==FW_DWN_SIGN_LOADED)
 		{
-			
-		}
-		else if(FW_Dwn_Stage==FW_DWN_IV_LOADED)
-		{
+			if(USB_RXed==8)
+			{
+				memcpy((void *)&cc20_iv[0],USB_RX_Buffer,8);
+			}
 			HAL_FLASH_Unlock();
       EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;
       EraseInitStruct.PageAddress = FW_Start_Address;
@@ -251,11 +253,67 @@ void USB_HND_FDN(void)
         }
       HAL_FLASH_Lock();
       FW_Dwn_Stage=FW_DWN_ERASED;
+			cc20_init();
+			Clean_USB_RX_Buf();
 		}
 		else if(FW_Dwn_Stage==FW_DWN_ERASED)
 		{
-			
+			if(USB_RXed==64)
+			{
+				uint8_t temp_decrypted[64];
+				int32_t data_size;
+				if(cc20_decrypt(USB_RX_Buffer,USB_RXed,temp_decrypted,data_size)!=true)
+				{
+					CDC_Transmit_FS((uint8_t*)"DErr\r\n",6);
+					FW_Dwn_Stage=FW_DWN_INIT;
+					USB_In_Handler=USB_Not_Hnd;
+				}
+				else
+				{
+				HAL_FLASH_Unlock();
+      HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_7);
+				Flash_Write(temp_decrypted,(uint8_t*)FW_Start_Address+FW_Already_Dwn,64);
+				HAL_FLASH_Lock();
+				FW_Already_Dwn+=64;
+					}
+				Clean_USB_RX_Buf();
+				
 		}
+			else if(FW_Dwn_size-FW_Already_Dwn<64)
+      {
+				uint8_t temp_decrypted[USB_RXed];
+				int32_t data_size;
+				if(cc20_decrypt(USB_RX_Buffer,USB_RXed,temp_decrypted,data_size)!=true)
+				{
+					CDC_Transmit_FS((uint8_t*)"DErr\r\n",6);
+					FW_Dwn_Stage=FW_DWN_INIT;
+					USB_In_Handler=USB_Not_Hnd;
+				}
+				else
+				{
+				HAL_FLASH_Unlock();
+				Flash_Write(temp_decrypted,(uint8_t*)FW_Start_Address+FW_Already_Dwn,FW_Dwn_size-FW_Already_Dwn);
+				HAL_FLASH_Lock();
+				Clean_USB_RX_Buf();
+      HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_RESET);
+      FW_Dwn_Stage=FW_DWN_LOADED;
+				}
+      CDC_Transmit_FS((uint8_t*)"Loaded\r\n",8);
+			}
+		}
+		else if(FW_Dwn_Stage==FW_DWN_LOADED)
+		{
+			if(Verify_FW()!=true)
+			{
+				CDC_Transmit_FS((uint8_t*)"VErr\r\n",6);
+				FW_Dwn_Stage=FW_DWN_INIT;
+				USB_In_Handler=USB_Not_Hnd;
+			}
+			CDC_Transmit_FS((uint8_t*)"Verified\r\n",10);
+			FW_Dwn_Stage=FW_DWN_INIT;
+				USB_In_Handler=USB_Not_Hnd;
+		}
+		
 }
 void USB_HND_TRT(void)
 {

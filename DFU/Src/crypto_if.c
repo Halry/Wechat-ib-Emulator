@@ -7,7 +7,9 @@ extern uint32_t RR_Sys_Tick;
 uint8_t DRNG_Output_B16[32];
 bool Is_DRNG_Get=0;
 const uint8_t ed25519_pk[32];
-const uint8_t cc20_key[32];
+const uint8_t cc20_key[16];
+uint8_t cc20_iv[8];
+CHACHActx_stt chacha20ctx_st; 
 uint8_t Get_DRNG(void)
 {
   uint8_t RNG_State=0;
@@ -48,12 +50,33 @@ uint8_t Get_DRNG(void)
   Is_DRNG_Get=true;
   return RNG_State;
 }
-bool Verify_FW(uint8_t *sign)
+bool Verify_FW(void)
 {
+	uint16_t fw_size=(((uint16_t)(*(uint8_t*)FW_Size_Address))<<8)|((uint16_t)(*(uint8_t*)(FW_Size_Address+1)));
+	if(ED25519verify((uint8_t*)FW_Start_Address,fw_size,(uint8_t*)FW_Sign_Address,ed25519_pk)!=SIGNATURE_VALID)
+	{
+		return false;
+	}
+	return true;
 }
-void cc20_init(void)
+bool cc20_init(void)
 {
-	
+  chacha20ctx_st.mFlags = E_SK_DEFAULT; 
+  chacha20ctx_st.mIvSize = 8;  
+  chacha20ctx_st.mKeySize = 16;
+	if(CHACHA_Decrypt_Init(&chacha20ctx_st,cc20_key,cc20_iv)!=CHACHA_SUCCESS)
+	{
+		return false;
+	}
+	return true;
+}
+bool cc20_decrypt(uint8_t *in_data_p,uint8_t in_length,uint8_t *out_data_p,int32_t out_length)
+{
+	if(CHACHA_Decrypt_Append(&chacha20ctx_st,in_data_p,in_length,out_data_p,&out_length)!=CHACHA_SUCCESS)
+	{
+		return false;
+	}
+	return true;
 }
 void Base16_Encode(const uint8_t *input, uint16_t input_len, uint8_t *output, uint16_t *output_len)
 {
