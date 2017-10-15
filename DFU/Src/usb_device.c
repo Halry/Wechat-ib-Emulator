@@ -95,6 +95,7 @@ void USB_Not_Handled_Handler(void)
       {
       if((memcmp(USB_RX_Buffer,"FDN",3))==0)
         {
+					CDC_Transmit_FS((uint8_t*)"Start\r\n",7);
 					Clean_USB_RX_Buf();
 					USB_In_Handler=USB_In_FDN;
         }

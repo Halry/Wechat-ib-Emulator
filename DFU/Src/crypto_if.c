@@ -7,7 +7,8 @@ extern uint32_t RR_Sys_Tick;
 uint8_t DRNG_Output_B16[32];
 bool Is_DRNG_Get=0;
 const uint8_t ed25519_pk[32];
-const uint8_t cc20_key[16];
+const uint8_t cc20_key[16]=
+{0xa0,0xe3 ,0xa8 ,0xfb ,0x15 ,0x0c ,0xee ,0x6b ,0x4f ,0x0f ,0x64 ,0xcb ,0x68 ,0x98 ,0x3b ,0x1a};
 uint8_t cc20_iv[8];
 CHACHActx_stt chacha20ctx_st; 
 uint8_t Get_DRNG(void)
