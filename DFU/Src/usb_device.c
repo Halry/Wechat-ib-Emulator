@@ -100,7 +100,6 @@ void USB_Not_Handled_Handler(void)
 					USB_In_Handler=USB_In_FDN;
 					FW_Dwn_Stage=FW_DWN_INIT;
 					FW_Already_Dwn=0;
-					USB_RX_Max_Size=2;
         }
       else if((memcmp(USB_RX_Buffer,"CDN",3))==0)
         {
@@ -198,13 +197,11 @@ void USB_HND_FDN(void)
 {
 	if(FW_Dwn_Stage==FW_DWN_INIT)
     {
-    if(USB_RXed==2)
-      {
-				FW_Dwn_size=(((uint16_t)*USB_RX_Buffer)<<8)|((uint16_t)*USB_RX_Buffer+1);
+				FW_Dwn_size=(((uint16_t)*USB_RX_Buffer)<<8)|(*(USB_RX_Buffer+1));
+				memcpy((void *)&cc20_iv[0],USB_RX_Buffer+2,8);
 				Clean_USB_RX_Buf();
 				FW_Dwn_Stage=FW_DWN_SIZE_LOADED;
-				USB_RX_Max_Size=64;
-			}
+			
 		}
 		else if(FW_Dwn_Stage==FW_DWN_SIZE_LOADED)
 		{
@@ -235,23 +232,11 @@ void USB_HND_FDN(void)
       HAL_NVIC_SystemReset();
       }
     HAL_FLASH_Lock();
-			FW_Dwn_Stage=FW_DWN_SIGN_LOADED;
-			Clean_USB_RX_Buf();
-			USB_RX_Max_Size=8;
-			}
-			
-		}
-		else if(FW_Dwn_Stage==FW_DWN_SIGN_LOADED)
-		{
-			if(USB_RXed==8)
-			{
-				memcpy((void *)&cc20_iv[0],USB_RX_Buffer,8);
-			}
 			HAL_FLASH_Unlock();
       EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;
       EraseInitStruct.PageAddress = FW_Start_Address;
       EraseInitStruct.NbPages     =64;
-      uint32_t erase_error=0;
+			erase_error=0;
       if(HAL_FLASHEx_Erase(&EraseInitStruct,&erase_error)!=HAL_OK)
         {
         //go to error
@@ -260,16 +245,17 @@ void USB_HND_FDN(void)
       HAL_FLASH_Lock();
       FW_Dwn_Stage=FW_DWN_ERASED;
 			cc20_init();
-				USB_RX_Max_Size=64;
 			Clean_USB_RX_Buf();
+			}
+			
 		}
 		else if(FW_Dwn_Stage==FW_DWN_ERASED)
 		{
-			if(USB_RXed==64)
+			if(FW_Dwn_size-FW_Already_Dwn>=64)
 			{
 				uint8_t temp_decrypted[64];
 				int32_t data_size;
-				if(cc20_decrypt(USB_RX_Buffer,USB_RXed,temp_decrypted,data_size)!=true)
+				if(cc20_decrypt(USB_RX_Buffer,64,temp_decrypted,data_size)!=true)
 				{
 					CDC_Transmit_FS((uint8_t*)"DErr\r\n",6);
 					FW_Dwn_Stage=FW_DWN_INIT;
@@ -290,7 +276,7 @@ void USB_HND_FDN(void)
       {
 				uint8_t temp_decrypted[USB_RXed];
 				int32_t data_size;
-				if(cc20_decrypt(USB_RX_Buffer,USB_RXed,temp_decrypted,data_size)!=true)
+				if(cc20_decrypt(USB_RX_Buffer,FW_Dwn_size-FW_Already_Dwn,temp_decrypted,data_size)!=true)
 				{
 					CDC_Transmit_FS((uint8_t*)"DErr\r\n",6);
 					FW_Dwn_Stage=FW_DWN_INIT;
@@ -303,14 +289,9 @@ void USB_HND_FDN(void)
 				HAL_FLASH_Lock();
 				Clean_USB_RX_Buf();
       HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_RESET);
-      FW_Dwn_Stage=FW_DWN_LOADED;
 				}
       CDC_Transmit_FS((uint8_t*)"Loaded\r\n",8);
-			}
-		}
-		else if(FW_Dwn_Stage==FW_DWN_LOADED)
-		{
-			if(Verify_FW()!=true)
+				if(Verify_FW()!=true)
 			{
 				CDC_Transmit_FS((uint8_t*)"VErr\r\n",6);
 				FW_Dwn_Stage=FW_DWN_INIT;
@@ -319,8 +300,8 @@ void USB_HND_FDN(void)
 			CDC_Transmit_FS((uint8_t*)"Verified\r\n",10);
 			FW_Dwn_Stage=FW_DWN_INIT;
 				USB_In_Handler=USB_Not_Hnd;
+			}
 		}
-		
 }
 void USB_HND_TRT(void)
 {
@@ -421,7 +402,7 @@ void USB_HND_PFDN(void)
       HAL_FLASH_Lock();
       Clean_USB_RX_Buf();
       HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_RESET);
-      FW_Dwn_Stage=FW_DWN_LOADED;
+      FW_Dwn_Stage=FW_DWN_INIT;
       USB_In_Handler=USB_Not_Hnd;
       CDC_Transmit_FS((uint8_t*)"Done\r\n",6);
       }

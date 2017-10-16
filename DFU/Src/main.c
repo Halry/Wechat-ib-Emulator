@@ -86,6 +86,8 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
   GPIO_Init();
+	bool verified=false;
+	verified=Verify_FW();
   /* USER CODE BEGIN 2 */
 #ifndef PROTOTYPE_DFU
   Is_Tampered=~(Read_BKP(RTC_BKP_DR1)&0x0001);
