@@ -160,7 +160,7 @@ void USB_Not_Handled_Handler(void)
           {
           HAL_NVIC_SystemReset();
           }
-        CDC_Transmit_FS(&DRNG_Output_B16[0],32);
+        CDC_Transmit_FS(DRNG_Output_B16,32);
         CDC_Transmit_FS(Device_ID_B16,24);
 					Clean_USB_RX_Buf();
 					USB_In_Handler=USB_In_TRT;
@@ -305,6 +305,7 @@ void USB_HND_FDN(void)
 }
 void USB_HND_TRT(void)
 {
+	
 }
 void USB_HND_CDN(void)
 {

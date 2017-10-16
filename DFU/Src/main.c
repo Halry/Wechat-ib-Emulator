@@ -86,14 +86,14 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
   GPIO_Init();
-	bool verified=false;
-	verified=Verify_FW();
+	bool fw_Verified=false;
+	fw_Verified=Verify_FW();
   /* USER CODE BEGIN 2 */
-#ifndef PROTOTYPE_DFU
+ PROTOTYPE_DFU
   Is_Tampered=~(Read_BKP(RTC_BKP_DR1)&0x0001);
-#endif
+
   /* USER CODE END 2 */
-  if((HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_3)!=GPIO_PIN_RESET&&(Read_BKP(RTC_BKP_DR1)&0x0002)==0)||HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_1)==GPIO_PIN_RESET)
+  if(((HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_3)!=GPIO_PIN_RESET&&(Read_BKP(RTC_BKP_DR1)&0x0002)==0)||HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_1)==GPIO_PIN_RESET)&&Is_Tampered==false&&fw_Verified==true)
     {
     Write_BKP(RTC_BKP_DR1,Read_BKP(RTC_BKP_DR1)&~0x0002);
     if(((*(__IO uint32_t*)FW_Start_Address) & 0x2FFE0000) == 0x20000000)
