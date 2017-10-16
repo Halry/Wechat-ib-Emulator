@@ -60,7 +60,7 @@ uint8_t USB_RX_Buffer[64];
 uint16_t USB_RXed=0;
 uint16_t USB_RX_Max_Size=64;
 bool Is_Connected=false;
-bool Is_Tampered=false;
+bool Not_Tampered=true;
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 
@@ -89,11 +89,11 @@ int main(void)
 	bool fw_Verified=false;
 	fw_Verified=Verify_FW();
   /* USER CODE BEGIN 2 */
- PROTOTYPE_DFU
-  Is_Tampered=~(Read_BKP(RTC_BKP_DR1)&0x0001);
-
+//#ifndef PROTOTYPE_DFU
+  Not_Tampered=(Read_BKP(RTC_BKP_DR1)&0x0001);
+//#endif
   /* USER CODE END 2 */
-  if(((HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_3)!=GPIO_PIN_RESET&&(Read_BKP(RTC_BKP_DR1)&0x0002)==0)||HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_1)==GPIO_PIN_RESET)&&Is_Tampered==false&&fw_Verified==true)
+  if(((HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_3)!=GPIO_PIN_RESET&&(Read_BKP(RTC_BKP_DR1)&0x0002)==0)||HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_1)==GPIO_PIN_RESET)&&Not_Tampered==true&&fw_Verified==true)
     {
     Write_BKP(RTC_BKP_DR1,Read_BKP(RTC_BKP_DR1)&~0x0002);
     if(((*(__IO uint32_t*)FW_Start_Address) & 0x2FFE0000) == 0x20000000)

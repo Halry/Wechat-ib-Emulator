@@ -279,13 +279,6 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
   /* USER CODE BEGIN 7 */
   USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
 	uint32_t wait_tick=HAL_GetTick();
-while(hcdc->TxState!=0)
-{
-	if(HAL_GetTick()-wait_tick>500)
-	{
-		hcdc->TxState=0;
-	}
-}
   USBD_CDC_SetTxBuffer(&hUsbDeviceFS, Buf, Len);
   result = USBD_CDC_TransmitPacket(&hUsbDeviceFS);
   /* USER CODE END 7 */

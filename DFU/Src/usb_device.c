@@ -11,7 +11,7 @@ USBD_HandleTypeDef hUsbDeviceFS;
 extern uint8_t USB_RX_Buffer[64];
 extern uint16_t USB_RXed;
 extern bool Is_Connected;
-extern bool Is_Tampered;
+extern bool Not_Tampered;
 extern uint16_t USB_RX_Max_Size;
 uint8_t USB_In_Handler=0;
 FLASH_EraseInitTypeDef EraseInitStruct;
@@ -77,7 +77,7 @@ void USB_Not_Handled_Handler(void)
 {
   if(*(USB_RX_Buffer+USB_RXed-1)==0x0D&&USB_RXed==1&&Is_Connected==false)
     {
-    if(Is_Tampered==true)
+    if(Not_Tampered==false)
       {
       CDC_Transmit_FS((uint8_t *)"!Tampered!\r\n",12);
       }
@@ -91,7 +91,7 @@ void USB_Not_Handled_Handler(void)
     }
   if(*(USB_RX_Buffer+USB_RXed-1)==0x0D&&Is_Connected==true)
     {
-    if(Is_Tampered==false)
+    if(Not_Tampered==true)
       {
       if((memcmp(USB_RX_Buffer,"FDN",3))==0)
         {
@@ -152,18 +152,43 @@ void USB_Not_Handled_Handler(void)
       {
       if((memcmp(USB_RX_Buffer,"TRT",3))==0)
         {
-        ///Send RR and Device id
-        RR_Sys_Tick=HAL_GetTick();
-        //Give Random to PC
-        uint8_t status=Get_DRNG();
-        if(status!=RNG_SUCCESS)
-          {
-          HAL_NVIC_SystemReset();
-          }
-        CDC_Transmit_FS(DRNG_Output_B16,32);
-        CDC_Transmit_FS(Device_ID_B16,24);
+					CDC_Transmit_FS((uint8_t*)"Start\r\n",7);
 					Clean_USB_RX_Buf();
 					USB_In_Handler=USB_In_TRT;
+        }
+				else if((memcmp(USB_RX_Buffer,"RR",2))==0)
+        {
+        RR_Sys_Tick=HAL_GetTick();
+        //Give Random to PC
+        if(Is_DRNG_Get==false)
+          {
+          uint8_t status=Get_DRNG();
+          if(status!=RNG_SUCCESS)
+            {
+            CDC_Transmit_FS((uint8_t *)"RNG Err:",8);
+            CDC_Transmit_FS(&status,1);
+						CDC_Transmit_FS((uint8_t *)"\r\n",2);
+            Clean_USB_RX_Buf();
+            }
+          else
+            {
+            CDC_Transmit_FS(&DRNG_Output_B16[0],32);
+							CDC_Transmit_FS((uint8_t *)"\r\n",2);
+							Clean_USB_RX_Buf();
+            }
+          }
+        else
+          {
+          CDC_Transmit_FS(&DRNG_Output_B16[0],32);
+						CDC_Transmit_FS((uint8_t *)"\r\n",2);
+						Clean_USB_RX_Buf();
+          }
+        }
+      else if((memcmp(USB_RX_Buffer,"IDR",3))==0)
+        {
+        CDC_Transmit_FS(Device_ID_B16,24);
+					CDC_Transmit_FS((uint8_t *)"\r\n",2);
+					Clean_USB_RX_Buf();
         }
       }
 #ifdef PROTOTYPE_DFU
@@ -305,7 +330,23 @@ void USB_HND_FDN(void)
 }
 void USB_HND_TRT(void)
 {
-	
+	if(USB_RXed==64)
+	{
+		uint8_t temp_decrypted[56];
+		memcpy(cc20_iv,USB_RX_Buffer,8);
+		cc20_init();
+		cc20_decrypt(USB_RX_Buffer+8,56,temp_decrypted,56);
+		if(memcmp(temp_decrypted,Device_ID_B16,24)==0)
+		{
+			if(memcmp(temp_decrypted+24,DRNG_Output_B16,32)==0)
+			{
+				//Reset Tamper Flag
+				Write_BKP(RTC_BKP_DR1,Read_BKP(RTC_BKP_DR1)|0x0001);
+				CDC_Transmit_FS((uint8_t *)"Reset\r\n",7);
+				HAL_NVIC_SystemReset();
+			}
+		}
+	}
 }
 void USB_HND_CDN(void)
 {
