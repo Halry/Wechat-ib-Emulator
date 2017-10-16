@@ -50,7 +50,7 @@
 #include "usbd_cdc_if.h"
 /* USER CODE BEGIN INCLUDE */
 /* USER CODE END INCLUDE */
-extern uint8_t *USB_RX_Buffer;
+extern uint8_t USB_RX_Buffer[64];
 extern uint16_t USB_RXed;
 extern uint8_t USB_In_Handler;
 extern uint16_t USB_RX_Max_Size;
@@ -78,8 +78,8 @@ extern uint16_t USB_RX_Max_Size;
 /* USER CODE BEGIN PRIVATE_DEFINES */
 /* Define size for the receive and transmit buffer over CDC */
 /* It's up to user to redefine and/or remove those define */
-#define APP_RX_DATA_SIZE  512
-#define APP_TX_DATA_SIZE  512
+#define APP_RX_DATA_SIZE  64
+#define APP_TX_DATA_SIZE  64
 /* USER CODE END PRIVATE_DEFINES */
 /**
   * @}
@@ -249,7 +249,7 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
   */
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
-  if(USB_RXed+*Len<USB_RX_Max_Size)
+  if(USB_RXed+*Len<USB_RX_Max_Size+1)
     {
     memcpy((USB_RX_Buffer+USB_RXed),Buf,*Len);
     USB_RXed+=*Len;
@@ -278,10 +278,7 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
   uint8_t result = USBD_OK;
   /* USER CODE BEGIN 7 */
   USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
-  if(hcdc->TxState != 0)
-    {
-    return USBD_BUSY;
-    }
+
   USBD_CDC_SetTxBuffer(&hUsbDeviceFS, Buf, Len);
   result = USBD_CDC_TransmitPacket(&hUsbDeviceFS);
   /* USER CODE END 7 */

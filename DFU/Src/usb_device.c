@@ -8,7 +8,7 @@
 #include "stdlib.h"
 /* USB Device Core handle declaration */
 USBD_HandleTypeDef hUsbDeviceFS;
-extern uint8_t *USB_RX_Buffer;
+extern uint8_t USB_RX_Buffer[64];
 extern uint16_t USB_RXed;
 extern bool Is_Connected;
 extern bool Is_Tampered;
@@ -98,6 +98,9 @@ void USB_Not_Handled_Handler(void)
 					CDC_Transmit_FS((uint8_t*)"Start\r\n",7);
 					Clean_USB_RX_Buf();
 					USB_In_Handler=USB_In_FDN;
+					FW_Dwn_Stage=FW_DWN_INIT;
+					FW_Already_Dwn=0;
+					USB_RX_Max_Size=2;
         }
       else if((memcmp(USB_RX_Buffer,"CDN",3))==0)
         {
@@ -195,12 +198,12 @@ void USB_HND_FDN(void)
 {
 	if(FW_Dwn_Stage==FW_DWN_INIT)
     {
-			FW_Already_Dwn=0;
-    if(*(USB_RX_Buffer+USB_RXed-1)!=0&&USB_RXed==2)
+    if(USB_RXed==2)
       {
 				FW_Dwn_size=(((uint16_t)*USB_RX_Buffer)<<8)|((uint16_t)*USB_RX_Buffer+1);
 				Clean_USB_RX_Buf();
 				FW_Dwn_Stage=FW_DWN_SIZE_LOADED;
+				USB_RX_Max_Size=64;
 			}
 		}
 		else if(FW_Dwn_Stage==FW_DWN_SIZE_LOADED)
@@ -232,9 +235,11 @@ void USB_HND_FDN(void)
       HAL_NVIC_SystemReset();
       }
     HAL_FLASH_Lock();
-			}
 			FW_Dwn_Stage=FW_DWN_SIGN_LOADED;
 			Clean_USB_RX_Buf();
+			USB_RX_Max_Size=8;
+			}
+			
 		}
 		else if(FW_Dwn_Stage==FW_DWN_SIGN_LOADED)
 		{
@@ -255,6 +260,7 @@ void USB_HND_FDN(void)
       HAL_FLASH_Lock();
       FW_Dwn_Stage=FW_DWN_ERASED;
 			cc20_init();
+				USB_RX_Max_Size=64;
 			Clean_USB_RX_Buf();
 		}
 		else if(FW_Dwn_Stage==FW_DWN_ERASED)

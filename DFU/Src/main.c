@@ -56,7 +56,7 @@ typedef  void (*pFunction)(void);
 pFunction JumpToApplication;
 uint32_t JumpAddress;
 /* Private variables ---------------------------------------------------------*/
-uint8_t *USB_RX_Buffer=NULL;
+uint8_t USB_RX_Buffer[64];
 uint16_t USB_RXed=0;
 uint16_t USB_RX_Max_Size=64;
 bool Is_Connected=false;
@@ -106,7 +106,6 @@ int main(void)
     }
   //after checking button or fw failed,the usb start
   USB_DEVICE_Init();
-  USB_RX_Buffer=malloc(64);
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   uint32_t sleep_tick=HAL_GetTick();
