@@ -89,9 +89,9 @@ int main(void)
 	bool fw_Verified=false;
 	fw_Verified=Verify_FW();
   /* USER CODE BEGIN 2 */
-//#ifndef PROTOTYPE_DFU
+#ifndef PROTOTYPE_DFU
   Not_Tampered=(Read_BKP(RTC_BKP_DR1)&0x0001);
-//#endif
+#endif
   /* USER CODE END 2 */
   if(((HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_3)!=GPIO_PIN_RESET&&(Read_BKP(RTC_BKP_DR1)&0x0002)==0)||HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_1)==GPIO_PIN_RESET)&&Not_Tampered==true&&fw_Verified==true)
     {
