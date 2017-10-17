@@ -13,8 +13,8 @@ void BT_Init()
   memset(null_minor,'\0',4);
   BT_Read_Setup_BKP();
   //read out bluetooth inited and last time minor from bkp
-  if(memcmp(null_minor,BT_Last_Minor,4)==0)
-    {
+//  if(memcmp(null_minor,BT_Last_Minor,4)==0)
+//    {
     BT_Power_Control(true);
     USART1_Init();
     BT_UART_Handler((uint8_t *)"AT+HOSTEN3",10);
@@ -31,7 +31,7 @@ void BT_Init()
     BT_Power_Control(false);
     BT_Write_Setup_BKP();
     USART1_DeInit();
-    }
+//    }
   BT_Classroom_Count=(*(uint8_t*)Room_Start_Address);
   if((BT_Classroom_Minor=malloc(BT_Classroom_Count*4))==NULL)//allocate minor space
     {

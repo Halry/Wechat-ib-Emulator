@@ -67,6 +67,14 @@ bool Verify_FW(void)
 	}
 	return true;
 }
+bool Verify_Data(uint8_t *in_data_p,uint8_t in_length,uint8_t *sign)
+{
+	if(ED25519verify(in_data_p,in_length,sign,ed25519_pk)!=SIGNATURE_VALID)
+	{
+		return false;
+	}
+	return true;
+}
 bool cc20_init(void)
 {
   chacha20ctx_st.mFlags = E_SK_DEFAULT; 

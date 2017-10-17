@@ -155,9 +155,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>339</LineNumber>
+          <LineNumber>421</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134239394</Address>
+          <Address>134238954</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -166,7 +166,7 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>../Src/usb_device.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\dfu\../Src/usb_device.c\339</Expression>
+          <Expression>\\dfu\../Src/usb_device.c\421</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -186,11 +186,18 @@
           <ItemText>USB_RX_Max_Size</ItemText>
         </Ww>
       </WatchWindow1>
+      <WatchWindow2>
+        <Ww>
+          <count>0</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>sign</ItemText>
+        </Ww>
+      </WatchWindow2>
       <MemoryWindow1>
         <Mm>
           <WinNumber>1</WinNumber>
           <SubType>0</SubType>
-          <ItemText>cc20_iv</ItemText>
+          <ItemText>sign</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow1>
@@ -198,7 +205,7 @@
         <Mm>
           <WinNumber>2</WinNumber>
           <SubType>0</SubType>
-          <ItemText>USB_RX_Buffer</ItemText>
+          <ItemText>0x20000D84</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow2>
@@ -206,7 +213,7 @@
         <Mm>
           <WinNumber>3</WinNumber>
           <SubType>0</SubType>
-          <ItemText>temp_decrypted</ItemText>
+          <ItemText>temp_receive</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow3>

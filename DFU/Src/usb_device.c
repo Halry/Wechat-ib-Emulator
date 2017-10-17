@@ -103,11 +103,21 @@ void USB_Not_Handled_Handler(void)
         }
       else if((memcmp(USB_RX_Buffer,"CDN",3))==0)
         {
-        //Get Encrypted Counter Data
+					if(Is_DRNG_Get==true)
+	{
+        CDC_Transmit_FS((uint8_t*)"Start\r\n",7);
+					Clean_USB_RX_Buf();
+					USB_In_Handler=USB_In_CDN;
+	}
         }
       else if((memcmp(USB_RX_Buffer,"RDN",3))==0)
         {
-        //Get Encrypted Classroom Data
+					if(Is_DRNG_Get==true)
+	{
+        	CDC_Transmit_FS((uint8_t*)"Start\r\n",7);
+					Clean_USB_RX_Buf();
+					USB_In_Handler=USB_In_RDN;
+	}
         }
       else if((memcmp(USB_RX_Buffer,"RR",2))==0)
         {
@@ -145,6 +155,7 @@ void USB_Not_Handled_Handler(void)
         }
       else if((memcmp(USB_RX_Buffer,"RST",3))==0)
         {
+					Write_BKP(RTC_BKP_DR1,Read_BKP(RTC_BKP_DR1)&~0x0002);
         HAL_NVIC_SystemReset();
         }
       }
@@ -322,9 +333,13 @@ void USB_HND_FDN(void)
 				FW_Dwn_Stage=FW_DWN_INIT;
 				USB_In_Handler=USB_Not_Hnd;
 			}
-			CDC_Transmit_FS((uint8_t*)"Verified\r\n",10);
+			else
+			{
+				HAL_NVIC_SystemReset();
+			CDC_Transmit_FS((uint8_t*)"Reset\r\n",10);
 			FW_Dwn_Stage=FW_DWN_INIT;
 				USB_In_Handler=USB_Not_Hnd;
+			}
 			}
 		}
 }
@@ -350,9 +365,97 @@ void USB_HND_TRT(void)
 }
 void USB_HND_CDN(void)
 {
+		static bool already_received=false;
+	uint8_t temp_decrypted[34];
+		static uint8_t temp_receive[98];
+	if(USB_RXed==64)
+	{
+		memcpy(cc20_iv,USB_RX_Buffer,8);
+		memcpy(temp_receive,USB_RX_Buffer+8,56);
+		already_received=true;
+		Clean_USB_RX_Buf();
+	}
+	else if(USB_RXed==42&&already_received==true)
+	{
+		memcpy(temp_receive+56,USB_RX_Buffer,42);
+		cc20_init();
+		cc20_decrypt(temp_receive,34,temp_decrypted,34);
+		if(memcmp(temp_decrypted,DRNG_Output_B16,32)==0)
+		{
+			if(Verify_Data(temp_decrypted,34,temp_receive+34)==true)
+			{
+			uint16_t temp_count=((uint16_t)*(temp_decrypted+32))|(((uint16_t)*(temp_decrypted+33))<<8);
+			Write_BKP(RTC_BKP_DR8,temp_count);
+			CDC_Transmit_FS((uint8_t *)"Reset\r\n",7);
+				HAL_NVIC_SystemReset();
+			}
+		
+		}
+		    Clean_USB_RX_Buf();
+		USB_In_Handler=USB_Not_Hnd;
 }
+	}
 void USB_HND_RDN(void)
 {
+	static uint8_t already_received=0;
+	static uint8_t temp_decrypted[117];
+	static uint8_t temp_receive[181];
+	if(USB_RXed==64)
+	{
+		if(already_received==0)
+		{
+		already_received=1;
+		memcpy(cc20_iv,USB_RX_Buffer,8);
+		memcpy(temp_receive,USB_RX_Buffer+8,56);
+		Clean_USB_RX_Buf();
+		}
+		else if(already_received==1)
+		{
+			already_received=2;
+			memcpy(temp_receive+56,USB_RX_Buffer,64);
+		Clean_USB_RX_Buf();
+		}
+	}
+	else if(USB_RXed==61&&already_received==2)
+	{
+		memcpy(temp_receive+120,USB_RX_Buffer,61);
+		cc20_init();
+		cc20_decrypt(temp_receive,117,temp_decrypted,117);
+		uint8_t sign[64];
+		memcpy(sign,temp_receive+117,64);
+		if(memcmp(temp_decrypted,Device_ID_B16,24)==0)
+		{
+			if(memcmp(temp_decrypted+24,DRNG_Output_B16,32)==0)
+			{
+				if(Verify_Data(temp_decrypted,117,sign)==true)
+				{
+				uint8_t temp_flash[FLASH_PAGE_SIZE];
+    memcpy(temp_flash,(uint8_t *)Room_Flash_Address,FLASH_PAGE_SIZE);
+    memcpy(temp_flash,temp_decrypted+24+32,61);
+    HAL_FLASH_Unlock();
+    EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;
+    EraseInitStruct.PageAddress = Room_Flash_Address;
+    EraseInitStruct.NbPages     =1;
+    uint32_t erase_error=0;
+    if(HAL_FLASHEx_Erase(&EraseInitStruct,&erase_error)!=HAL_OK)
+      {
+      //go to error
+      HAL_NVIC_SystemReset();
+      }
+    if(Flash_Write(temp_flash,(uint8_t *)Room_Flash_Address,FLASH_PAGE_SIZE)!=0)
+      {
+      //go to error
+      HAL_NVIC_SystemReset();
+      }
+    HAL_FLASH_Lock();
+    CDC_Transmit_FS((uint8_t *)"Reset\r\n",7);
+			HAL_NVIC_SystemReset();
+			}
+		}
+		}
+		USB_In_Handler=USB_Not_Hnd;
+		Clean_USB_RX_Buf();
+	}
 }
 #ifdef PROTOTYPE_DFU
 void USB_HND_PCDN(void)

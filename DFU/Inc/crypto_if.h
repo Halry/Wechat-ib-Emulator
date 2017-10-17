@@ -11,6 +11,7 @@ void Base16_Encode(const uint8_t *input, uint16_t input_len, uint8_t *output, ui
 	bool Verify_FW(void);
 	bool cc20_decrypt(uint8_t *in_data_p,uint8_t in_length,uint8_t *out_data_p,int32_t out_length);
 	bool cc20_init(void);
+	bool Verify_Data(uint8_t *in_data_p,uint8_t in_length,uint8_t *sign);
 #ifdef __cplusplus
 }
 #endif

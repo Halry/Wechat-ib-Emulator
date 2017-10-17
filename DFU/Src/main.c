@@ -93,7 +93,7 @@ int main(void)
   Not_Tampered=(Read_BKP(RTC_BKP_DR1)&0x0001);
 #endif
   /* USER CODE END 2 */
-  if(((HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_3)!=GPIO_PIN_RESET&&(Read_BKP(RTC_BKP_DR1)&0x0002)==0)||HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_1)==GPIO_PIN_RESET)&&Not_Tampered==true&&fw_Verified==true)
+  if(((Read_BKP(RTC_BKP_DR1)&0x0002)==0||HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_1)==GPIO_PIN_RESET)&&Not_Tampered==true&&fw_Verified==true&&HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_3)!=GPIO_PIN_RESET)
     {
     Write_BKP(RTC_BKP_DR1,Read_BKP(RTC_BKP_DR1)&~0x0002);
     if(((*(__IO uint32_t*)FW_Start_Address) & 0x2FFE0000) == 0x20000000)
@@ -118,7 +118,7 @@ int main(void)
       uint32_t pwr_hold_tick=HAL_GetTick();
       while(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0)==SET)
         {
-        if(HAL_GetTick()-pwr_hold_tick>=3000)
+        if(HAL_GetTick()-pwr_hold_tick>=2000)
           {
           Write_BKP(RTC_BKP_DR1,Read_BKP(RTC_BKP_DR1)&~0x0002);
           HAL_NVIC_SystemReset();
