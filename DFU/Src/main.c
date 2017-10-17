@@ -92,6 +92,10 @@ int main(void)
 #ifndef PROTOTYPE_DFU
   Not_Tampered=(Read_BKP(RTC_BKP_DR1)&0x0001);
 #endif
+	#ifdef PROTOTYPE_DFU
+	Not_Tampered=true;
+	fw_Verified=true;
+	#endif
   /* USER CODE END 2 */
   if(((Read_BKP(RTC_BKP_DR1)&0x0002)==0||HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_1)==GPIO_PIN_RESET)&&Not_Tampered==true&&fw_Verified==true&&HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_3)!=GPIO_PIN_RESET)
     {

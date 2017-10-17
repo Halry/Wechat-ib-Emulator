@@ -57,7 +57,7 @@
 #include "stdlib.h"
 #include "crypto_if.h"
 #include "string.h"
-//#define PROTOTYPE_DFU
+#define PROTOTYPE_DFU
 /* USER CODE END Includes */
 #define USB_Not_Hnd 0
 #define USB_In_FDN 1
