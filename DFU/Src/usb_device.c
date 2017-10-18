@@ -335,10 +335,10 @@ void USB_HND_FDN(void)
 			}
 			else
 			{
-				HAL_NVIC_SystemReset();
-			CDC_Transmit_FS((uint8_t*)"Reset\r\n",10);
+				CDC_Transmit_FS((uint8_t*)"Reset\r\n",10);
 			FW_Dwn_Stage=FW_DWN_INIT;
 				USB_In_Handler=USB_Not_Hnd;
+				//HAL_NVIC_SystemReset();
 			}
 			}
 		}

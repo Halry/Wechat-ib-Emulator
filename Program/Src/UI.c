@@ -285,7 +285,8 @@ void UI_Settings_Selection(uint8_t select)
       DR0_BK=DR0_BK|0x0002;
       HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR1,DR0_BK);
       HAL_PWR_DisableBkUpAccess();
-      NVIC_SystemReset();
+				HAL_Delay(1000);
+      HAL_NVIC_SystemReset();
       }
     case 2://Version
       {

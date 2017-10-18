@@ -60,7 +60,7 @@ uint8_t USB_RX_Buffer[64];
 uint16_t USB_RXed=0;
 uint16_t USB_RX_Max_Size=64;
 bool Is_Connected=false;
-bool Not_Tampered=true;
+bool Not_Tampered=false;
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 
@@ -89,9 +89,7 @@ int main(void)
 	bool fw_Verified=false;
 	fw_Verified=Verify_FW();
   /* USER CODE BEGIN 2 */
-#ifndef PROTOTYPE_DFU
   Not_Tampered=(Read_BKP(RTC_BKP_DR1)&0x0001);
-#endif
 	#ifdef PROTOTYPE_DFU
 	Not_Tampered=true;
 	fw_Verified=true;
