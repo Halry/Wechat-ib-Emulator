@@ -67,9 +67,14 @@ void UI_Main(void)
   UI_Update_Left_Count();
   OLED_R_ShowChinese(0,1,Chinese_ptr[0]);
   OLED_ShowChinese(0,3,Chinese_ptr[1]);
+	uint32_t tick_count=HAL_GetTick();
   //Display Left Count
   while(1)
     {
+			if(HAL_GetTick()-tick_count>=10000)
+			{
+				System_low_power(PWR_STDBY);
+			}
     key=Get_Key(false);
     if(key==Key_Down)
       {
@@ -94,9 +99,12 @@ void UI_Main(void)
         UI_Classroom_Selection();
         }
       }
-    else if(key==Key_X&&Get_Key(true)>=100)
+    else if(key==Key_X&&Get_Key(true)>=300)
       {
-      UI_Power_Off();
+				OLED_PowerOff();
+				while(HAL_GPIO_ReadPin(GPIOA,GPIO_Key_X)==GPIO_PIN_SET);
+				HAL_Delay(500);
+     System_low_power(PWR_STDBY);
       }
     }
 }
@@ -106,10 +114,11 @@ void UI_Power_Off(void)
   UI_Clear_Below_Stat_Bar();
   OLED_ShowChinese(0,1,Sure_Power_Off[0]);
   OLED_ShowString(64,1,(uint8_t *)"?",true);
-  while(Get_Key(true)!=0);
+  while(HAL_GPIO_ReadPin(GPIOA,GPIO_Key_OK)!=GPIO_PIN_RESET);
+	Reset_Key_State();
   while(1)
     {
-    key=Get_Key(false);
+    key=Key_Scan();
     if(key==Key_OK)
       {
       System_low_power(PWR_STDBY);
@@ -278,19 +287,17 @@ void UI_Settings_Selection(uint8_t select)
       }
     case 1://DFU
       {
-      while(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_3)==GPIO_PIN_RESET);
       HAL_PWR_EnableBkUpAccess();
       uint16_t DR0_BK=0;
       DR0_BK=HAL_RTCEx_BKUPRead(&hrtc,RTC_BKP_DR1);
       DR0_BK=DR0_BK|0x0002;
       HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR1,DR0_BK);
       HAL_PWR_DisableBkUpAccess();
-				HAL_Delay(1000);
       HAL_NVIC_SystemReset();
       }
     case 2://Version
       {
-      OLED_ShowString(0,1,(uint8_t*)"SW:",true);
+      OLED_ShowString(0,1,(uint8_t*)"FW:",true);
       OLED_ShowString(24,1,(uint8_t*)System_Version,true);
       OLED_ShowString(0,3,(uint8_t*)"HW:",true);
       OLED_ShowString(24,3,(uint8_t*)HW_Ver,true);
@@ -298,7 +305,7 @@ void UI_Settings_Selection(uint8_t select)
 				OLED_ShowString(0,5,(uint8_t*)"Debug FW!",true);
 				#endif
 				#ifndef SYS_DBG
-				OLED_ShowString(0,5,(uint8_t*)"Design by Halry",true);
+				OLED_ShowString(0,5,(uint8_t*)"Halry Prd",true);
 				#endif
       while(1)
         {

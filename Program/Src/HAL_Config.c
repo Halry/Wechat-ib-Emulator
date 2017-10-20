@@ -321,20 +321,10 @@ void System_Startup_Init(void)
   HAL_Init();
   System_Clock_Ctrl(LS_CLK);
   GPIO_Init();
-  if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0)==GPIO_PIN_SET)
-    {
-#ifndef SYS_DBG
-    HAL_Delay(1000);
-    if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0)!=GPIO_PIN_SET)
-      {
-      System_low_power(PWR_STDBY);
-      }
-#endif
-    }
 //RTC_Init();
   OLED_Init();
   UI_Show_Please_Wait();
-  OLED_ShowString(0,3,(uint8_t*)"SW:",true);
+  OLED_ShowString(0,3,(uint8_t*)"FW:",true);
   OLED_ShowString(24,3,(uint8_t*)System_Version,true);
   OLED_ShowString(0,5,(uint8_t*)"HW:",true);
   OLED_ShowString(24,5,(uint8_t*)HW_Ver,true);

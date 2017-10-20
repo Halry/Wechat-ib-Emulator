@@ -58,7 +58,7 @@
 
 /* USER CODE BEGIN Private defines */
 /* USER CODE END Private defines */
-#define SYS_DBG
+//#define SYS_DBG
 
 void _Error_Handler(char *, int);
 
