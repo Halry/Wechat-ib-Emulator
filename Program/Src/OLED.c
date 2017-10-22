@@ -467,7 +467,7 @@ void OLED_Clear(void)
 void OLED_PowerOff()
 {
   OLED_Ready=false;
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET);
+  OLED_Switch(false);
   OLED_SPI_Ctrl(false);
 }
 void OLED_Switch(bool enable)

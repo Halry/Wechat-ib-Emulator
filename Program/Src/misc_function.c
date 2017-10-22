@@ -73,14 +73,27 @@ void Reset_Key_State(void)
 //low power action
 void System_low_power(uint8_t low_power_type)
 {
+	GPIO_InitTypeDef GPIO_InitStruct;
   switch(low_power_type)
     {
     case PWR_STDBY:
+			HAL_DBGMCU_DisableDBGStandbyMode();
+			__HAL_RCC_PWR_CLK_ENABLE();
+			HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN1);
+		GPIO_InitStruct.Pin = GPIO_PIN_0;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+		HAL_GPIO_WritePin(GPIOA,GPIO_PIN_0,GPIO_PIN_RESET);
+		HAL_Delay(50);
       __HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
-      __HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
+		__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
+		HAL_PWR_EnableBkUpAccess();
       HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
       HAL_PWR_EnterSTANDBYMode();
+		break;
     }
+		
+			
 }
 
 

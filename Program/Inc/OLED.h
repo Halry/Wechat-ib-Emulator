@@ -36,6 +36,6 @@ void OLED_R_ShowString(uint8_t x,uint8_t y,const uint8_t *chr,bool Large_Font);
 void OLED_R_ShowChinese(uint8_t x,uint8_t y,const uint8_t *chinese);
 //show bmp
 void OLED_DrawBMP(uint8_t x0, uint8_t y0,uint8_t x1, uint8_t y1,const uint8_t* BMP);
-
+void OLED_Switch(bool enable);
 
 #endif

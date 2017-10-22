@@ -19,6 +19,7 @@
 #define PWR_STDBY 0
 #define PWR_SLEP 1
 #define PWR_STOP 2
+#define screen_off 3
 //Key Handle define
 #define Key_X 1
 #define Key_Up 2

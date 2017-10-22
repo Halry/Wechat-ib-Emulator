@@ -525,7 +525,11 @@ void HAL_PWR_EnterSTANDBYMode(void)
 
   /* Set SLEEPDEEP bit of Cortex System Control Register */
   SET_BIT(SCB->SCR, ((uint32_t)SCB_SCR_SLEEPDEEP_Msk));
-
+	__HAL_PWR_CLEAR_FLAG(PWR_FLAG_SB);
+		__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
+	HAL_DeInit();
+	__HAL_RCC_PWR_CLK_ENABLE();
+	HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
   /* This option is used to ensure that store operations are completed */
 #if defined ( __CC_ARM)
   __force_stores();

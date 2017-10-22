@@ -321,7 +321,7 @@ void System_Startup_Init(void)
   HAL_Init();
   System_Clock_Ctrl(LS_CLK);
   GPIO_Init();
-//RTC_Init();
+	//RTC_Init();
   OLED_Init();
   UI_Show_Please_Wait();
   OLED_ShowString(0,3,(uint8_t*)"FW:",true);

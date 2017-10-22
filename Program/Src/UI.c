@@ -99,12 +99,9 @@ void UI_Main(void)
         UI_Classroom_Selection();
         }
       }
-    else if(key==Key_X&&Get_Key(true)>=300)
+    else if(key==Key_X&&Get_Key(true)>=100)
       {
-				OLED_PowerOff();
-				while(HAL_GPIO_ReadPin(GPIOA,GPIO_Key_X)==GPIO_PIN_SET);
-				HAL_Delay(500);
-     System_low_power(PWR_STDBY);
+				UI_Power_Off();
       }
     }
 }
@@ -114,14 +111,14 @@ void UI_Power_Off(void)
   UI_Clear_Below_Stat_Bar();
   OLED_ShowChinese(0,1,Sure_Power_Off[0]);
   OLED_ShowString(64,1,(uint8_t *)"?",true);
-  while(HAL_GPIO_ReadPin(GPIOA,GPIO_Key_OK)!=GPIO_PIN_RESET);
+  while(Get_Key(false)==Key_X);
 	Reset_Key_State();
   while(1)
     {
     key=Key_Scan();
     if(key==Key_OK)
       {
-      System_low_power(PWR_STDBY);
+      System_low_power(screen_off);
       }
     else if(key==Key_X)
       {
