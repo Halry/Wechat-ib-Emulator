@@ -122,21 +122,20 @@ void ADC1_DeInit(void)
 void RTC_Init(void)
 {
   RTC_TimeTypeDef sTime;
-  RTC_DateTypeDef DateToUpdate;
   RTC_TamperTypeDef sTamper;
   /**Initialize RTC Only
   */
   hrtc.Instance = RTC;
   hrtc.Init.AsynchPrediv = RTC_AUTO_1_SECOND;
   hrtc.Init.OutPut = RTC_OUTPUTSOURCE_NONE;
-  if(HAL_RTC_Init(&hrtc) != HAL_OK)
-    {
-    _Error_Handler(__FILE__, __LINE__);
-    }
+//  if(HAL_RTC_Init(&hrtc) != HAL_OK)
+//    {
+//    _Error_Handler(__FILE__, __LINE__);
+//    }
   /**Enable the RTC Tamper
   */
   sTamper.Tamper = RTC_TAMPER_1;
-  sTamper.Trigger = RTC_TAMPERTRIGGER_HIGHLEVEL;
+  sTamper.Trigger = RTC_TAMPERTRIGGER_LOWLEVEL;
   if(HAL_RTCEx_SetTamper_IT(&hrtc, &sTamper) != HAL_OK)
     {
     _Error_Handler(__FILE__, __LINE__);

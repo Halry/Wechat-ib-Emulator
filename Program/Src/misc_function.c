@@ -91,6 +91,10 @@ void System_low_power(uint8_t low_power_type)
       HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN1);
       HAL_PWR_EnterSTANDBYMode();
 		break;
+		case screen_off:
+			OLED_PowerOff();
+		while(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_0)==GPIO_PIN_RESET);
+		HAL_NVIC_SystemReset();
     }
 		
 			

@@ -16,7 +16,7 @@
 extern TIM_HandleTypeDef htim4;
 
 
-const char *System_Version="1.2a";
+const char *System_Version="1.3b";
 const char *HW_Ver="0.1a";
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/

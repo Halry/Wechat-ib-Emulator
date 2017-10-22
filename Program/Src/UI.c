@@ -73,7 +73,7 @@ void UI_Main(void)
     {
 			if(HAL_GetTick()-tick_count>=10000)
 			{
-				System_low_power(PWR_STDBY);
+				System_low_power(screen_off);
 			}
     key=Get_Key(false);
     if(key==Key_Down)
